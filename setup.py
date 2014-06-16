@@ -13,7 +13,7 @@ if sys.version_info[0] == 2:
     # python2 does not have mock in the standard lib
     install_requires.append('mock')
 
-setup(name="mp.import",
+setup(name="mp.importer",
       version="0.1",
       description="Utilities to ease imports of content to MetroPublisher.",
       packages=find_packages(),
@@ -31,5 +31,5 @@ setup(name="mp.import",
           "Programming Language :: Python :: 3",
           "Programming Language :: Python :: 3.4",
           ],
-      test_suite="mp.import.tests",
+      test_suite="mp.importer.tests",
       )
