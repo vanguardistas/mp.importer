@@ -12,8 +12,50 @@ def remove_all_whitespace(text):
     text = text.replace('\t', '')
     return text.replace(C_NB_SPACE, '')
 
+def drop_node(node, add_padding=False, keep_content=True):
+    """Remove a tag while optionally keeping the content.
+
+    If add_passing is true, a single whitespace will be added at the start and
+    end of the node's content if necessary.
+
+    The node's tail will allways be preserved.
+    """
+    parent = node.getparent()
+    prev = node.getprevious()
+    if keep_content:
+        # save the node's text
+        if node.text:
+            _save_text(parent, prev, node.text, add_padding)
+        # save the node's children
+        for child in node.getchildren():
+            node.remove(child)
+            if prev is None:
+                parent.insert(0, child)
+            else:
+                parent.insert(parent.index(prev) + 1, child)
+            prev = child # new last node
+    # save the node's tail
+    if node.tail:
+        _save_text(parent, prev, node.tail, add_padding)
+    parent.remove(node)
+
+
+def remove_noop_inline_elements(context, content):
+    """Remove inline elements that have no effect.
+
+    For example a span with no attributes. i.e.
+        <span>FooBar</span>
+    """
+    for node in content.findall('.//span'):
+        if node.attrib:
+            continue
+        drop_node(node, add_padding=False, keep_content=True)
+
 def remove_useless_br(context, content):
-    # remove a br if it is the last node in a blocklevel element and has a whitespace tail
+    """Remove <br> tags that do not contribute anything to rendering.
+
+    It is reasonably safe to remove a br if it is the last or first node in a blocklevel element
+    """
     for node in content.findall('.//br'):
         if node.text or len(node):
             # sanity checks (though br should never contain nodes or have text)
@@ -68,3 +110,28 @@ def remove_useless_br(context, content):
             context.prob('fuzzy_fix', 'remove trailing <br/> in block element')
             parent.remove(node)
             return remove_useless_br(context, content)
+
+#
+# Internal utilities
+#
+
+def _save_text(parent, previous, text, add_space):
+    if text.startswith(' '):
+        add_space = False
+    if previous is not None:
+        # stick text onto the previou node's tail
+        if not previous.tail:
+            previous.tail = text
+        else:
+            if add_space and previous.tail[-1] != ' ':
+                previous.tail += ' '
+            previous.tail += text
+    else:
+        # no previous node, stick our tail onto the parent's text
+        if not parent.text:
+            parent.text = text
+        else:
+            if add_space and parent.text[-1] != ' ':
+                parent.text += ' '
+            parent.text += text
+
