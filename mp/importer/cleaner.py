@@ -1,3 +1,5 @@
+from lxml import etree
+
 BLOCK_ELEMENTS = frozenset(['p', 'h4', 'hr', 'pre', 'blockquote', 'ul', 'ol', 'li'])
 
 # Charachters
@@ -11,6 +13,35 @@ def remove_all_whitespace(text):
     text = text.replace('\r', '')
     text = text.replace('\t', '')
     return text.replace(C_NB_SPACE, '')
+
+def bubble_one_up(node):
+    """Push a node up one level in the tree.
+
+    If the parent node has content, it will be split in two."""
+    parent = node.getparent()
+    grandparent = parent.getparent()
+    if grandparent is None:
+        return
+    new = etree.Element(parent.tag)
+    grandparent.insert(grandparent.index(parent), new)
+    new.text = parent.text
+    parent.text = node.tail
+    node.tail = None
+    for n in parent:
+        if n is node:
+            break
+        parent.remove(n)
+        new.append(n)
+    else:
+        raise AssertionError('oops') # pragma: no cover
+    parent.remove(node)
+    grandparent.insert(grandparent.index(parent), node)
+    # optionally remove either parent or new if they are empty
+    if parent.text is None and not len(parent):
+        node.tail = parent.tail
+        grandparent.remove(parent)
+    if new.text is None and not len(new):
+        grandparent.remove(new)
 
 def drop_node(node, add_padding=False, keep_content=True):
     """Remove a tag while optionally keeping the content.

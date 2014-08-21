@@ -124,6 +124,67 @@ class Test_remove_noop_inline_elements(CleanerTest):
                 '<p>empty <span>spans</span> do <span>get</span> <span class="big">REMOVED</span> iff<span>theyare</span>empty</p>',
                 '<p>empty spans do get <span class="big">REMOVED</span> ifftheyareempty</p>')
 
+class Test_bubble_one_up(CleanerTest):
+
+    def cleaner(self, context, content):
+        from ..cleaner import bubble_one_up
+        for node in content.findall('.//bubble'):
+            bubble_one_up(node)
+
+    def test_bubble_with_tail(self):
+        self.assertCleaned(
+                '<p>bubbling <bubble>up</bubble> node</p>',
+                '<p>bubbling </p><bubble>up</bubble><p> node</p>')
+
+    def test_bubble_with_other_elements(self):
+        self.assertCleaned(
+                '<p>bubbling <em>an</em> element <bubble>up</bubble> node</p>',
+                '<p>bubbling <em>an</em> element </p><bubble>up</bubble><p> node</p>')
+        self.assertCleaned(
+                '<p>bubbling <em>an</em> element <bubble>up</bubble> aaa <s>node</s></p>',
+                '<p>bubbling <em>an</em> element </p><bubble>up</bubble><p> aaa <s>node</s></p>')
+        self.assertCleaned(
+                '<p>bubbling <bubble>up</bubble> aaa <s>node</s></p>',
+                '<p>bubbling </p><bubble>up</bubble><p> aaa <s>node</s></p>')
+
+    def test_bubble_with_nothing_before(self):
+        self.assertCleaned(
+                '<p><bubble>up</bubble>text</p>',
+                '<bubble>up</bubble><p>text</p>')
+        self.assertCleaned(
+                '<p><bubble>up</bubble><em>em</em></p>',
+                '<bubble>up</bubble><p><em>em</em></p>')
+
+    def test_bubble_with_nothing_after(self):
+        self.assertCleaned(
+                '<p>text<bubble>up</bubble></p>ptail',
+                '<p>text</p><bubble>up</bubble>ptail')
+        self.assertCleaned(
+                '<p><em>em</em><bubble>up</bubble></p>',
+                '<p><em>em</em></p><bubble>up</bubble>')
+
+    def test_bubble_with_nothing(self):
+        self.assertCleaned(
+                '<p><bubble>up</bubble></p>ptail',
+                '<bubble>up</bubble>ptail')
+        self.assertCleaned(
+                '<p><bubble>up</bubble></p>',
+                '<bubble>up</bubble>')
+
+    def test_bubble_with_only_nodes(self):
+        self.assertCleaned(
+                '<p><bubble>up</bubble><em>em</em></p>',
+                '<bubble>up</bubble><p><em>em</em></p>')
+        self.assertCleaned(
+                '<p><em>em</em><bubble>up</bubble></p>',
+                '<p><em>em</em></p><bubble>up</bubble>')
+
+    def test_bubble_at_top(self):
+        # is a noop
+        self.assertCleaned(
+                '<bubble>up</bubble><p>para</p>',
+                '<bubble>up</bubble><p>para</p>')
+
 class Test_drop_node(CleanerTest):
 
     def cleaner(self, context, content, **kw):
