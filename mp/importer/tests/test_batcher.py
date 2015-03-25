@@ -35,7 +35,7 @@ class TestBatcher(TestCase):
         context = make_test_context(2,0,3)
         from .. import batcher									
         result = batcher.run_in_batches(context, input_list, process_one)				
-        self.assertEqual(result,[['A'],['B'],['C'],['D']])
+        self.assertEqual(result,['A','B','C','D'])
     #
     # 2- test that the function starts being executed from a specified batch number (batches of given size) and that the max_batches works
     def test_Start_from_Batch(self):
@@ -43,7 +43,7 @@ class TestBatcher(TestCase):
        context = make_test_context(2,2,1)
        from .. import batcher									
        result = batcher.run_in_batches(context, input_list, process_one)				
-       self.assertEqual(result,[['E'],['F']])
+       self.assertEqual(result,['E','F'])
  
 
 
