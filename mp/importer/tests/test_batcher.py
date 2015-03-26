@@ -50,14 +50,14 @@ class TestBatcher(TestCase):
         test_list = list()
         test_list.append('a') 									# for now i use letters because i still do "upper"
         test_list.append('a')
-        test_list.append('x')		# test_list = ('a','a','x'), test_set is same
+        test_list.append('x')									# test_list = ('a','a','x'), test_set is same
         test_set = set(test_list)
         test_frozenset = frozenset()
         filename = '/home/kiara/GIT/mp.importer/mp/importer/tests/test.csv'
         openedfile = open(filename, 'r')
         test_row_list = list()
         for row in openedfile:
-            test_row = row[:-1]									# in case of file, i read the lines of the file and create a list, that will be then splitted
+            test_row = row[:-1]									# read the lines of the file and create a list, that will be then splitted 
             test_row_list.append(test_row)
         input_to_test = [test_list, test_set, test_frozenset, set(), list(), test_row_list]   # try list(), set(), tuples
         from .. import batcher	
@@ -70,9 +70,8 @@ class TestBatcher(TestCase):
             else:	
                 #print i									
                 pass
-                #self.fail()									# non-iterable should fall in here -  test_set, test_frozenset, set()
-        self.assertEqual(result_list,[['A','A', 'X'], [], ['CHIARA', 'ANNA', 'XXX', 'X']])	 # empty list gives this... [[], []] change in code to skip empty things!
-
+                #self.fail()									# non-iterable fall in here -  test_set, test_frozenset, set()
+        self.assertEqual(result_list,[['A','A', 'X'], [], ['CHIARA,ANNA', 'ANNA,CHIARA', 'XXX,', 'X']])	 # nb: takes the entire line of the csv
 
 
 
