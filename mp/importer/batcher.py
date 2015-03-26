@@ -13,21 +13,21 @@ def get_batches(context, iterable, nb):
     for i in iterable:
         count += 1
         if start+bsize*nb <= count-1 <= start+bsize*nb+bsize-1:      	# filter for yielding - takes the nb-batch 
-            print ("batch", i)
+            print ("batch element", i)
             yield i
-
 
 def run_in_batches(context, iterable, end_batch):
     bmax = context.max_batches
     for nbatch in range(0,bmax):
-        print ('nbatch', nbatch)
-        got_batch = get_batches(context, iterable, nbatch)		# gets batch elements (yields) for each value of nbatch
         c = 0 
-        nbatch = nbatch+1
+        print ('nbatch', nbatch)
+        got_batch = get_batches(context, iterable, nbatch)		# gets batch elements (yields) for each value of nbatch - changes at every iteration
         for k in got_batch:
-            c = c+1						# in the yielded batch, appends X in the right place
-            yield k
+            c = c+1							# counter 					
+            print (c, k)
+            yield k							# in the yielded batch, appends X in the right place
             if c == context.batch_size:
-                end_batch()						        # appends 'X' when batch ends
+                end_batch()						# appends 'X' when batch ends
+                break
 
 

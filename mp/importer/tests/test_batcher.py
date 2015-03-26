@@ -18,11 +18,11 @@ def make_test_context(b_size, b_start, b_max):									# creates a "provisional"
 class TestBatcher(TestCase):
     def test_batches(self):
         log = []
-        def end_batch():				# appends x at the end of each batch
+        def end_batch():				
             log.append('X')
         from .. import batcher
         context = make_test_context(2,0,2)
-        batcher = batcher.run_in_batches(		# reads from iterable and executes end_batch
+        batcher = batcher.run_in_batches(		# reads from iterable., creates batches and executes end_batch at the end of each one
                 context,
                 iter('abcdef'), end_batch)
         for letter in batcher:				# takes the letter yielded by run_in_batches
