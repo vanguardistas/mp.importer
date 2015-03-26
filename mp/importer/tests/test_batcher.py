@@ -32,7 +32,7 @@ class TestBatcher(TestCase):
     # 1- test that the function makes batches of a given size
     def test_Make_Batches(self):
         input_list = ['a','b','c','d'] 									
-        context = make_test_context(2,0,3)
+        context = make_test_context(2,0,100)			# there is no problem if end_batch is 100 because the loop ends when the iterator ends
         from .. import batcher									
         result = batcher.run_in_batches(context, input_list, process_one)				
         self.assertEqual(result,['A','B','C','D'])

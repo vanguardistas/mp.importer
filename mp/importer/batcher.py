@@ -23,28 +23,37 @@ def run_in_batches(context, iterable, process_one):
         for k in got_batch:
        	    result = process_one(k)					# tot_result.append(result) - instead of nesting lists, merge
             tot_result += result
-            #yield k							# yield for statistics function (in pipeline)? TODO
+            statistics(result)
+            #yield k							# yield for statistics function (in pipeline) but then i cannot return tot_result? TODO
         end_batch(context,nbatch)					
     return tot_result
 
-#TODO: add to session #context.sess.add(result) or it will be done out of this function?
+# context.sess.add(result) is done out in the real process_one function (e.g. do_one)
 
-# call the end_batch function when each batch is over
+# call the end_batch function:
 def end_batch(context, nb):
     pass
     #print "end batch number", nb
     #context.sess.flush()
 
-# yield got_batch.next()
-def statistics(context,got_batch):
+# statistics performed for each batch - yield got_batch and use .next() for elements and call statistics(got_batch) TODO 
+def statistics(res):					
    ok = 0
    not_ok = 0
-   for k in got_batch:
-       if k is not None:
+   tot = 0
+   if res:
+       tot = tot+1
+       if res is not None:						# add option if result == 'skip' then continue
            ok = ok+1
        else:
            not_ok = not_ok+1
+   print ('IMPORTED {} of {} ({:.1%} success rate)'.format(ok, tot, ok/(float(tot) + 0.00001)))
    #context.prob() # "problems for this batch are", not_ok
 
-
+  # for k in got_batch:
+  #     tot = tot+1
+  #     if k is not None:						# add option if result == 'skip' then continue
+   #        ok = ok+1
+   #    else:
+   #        not_ok = not_ok+1
 
