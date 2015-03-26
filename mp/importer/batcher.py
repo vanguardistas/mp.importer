@@ -12,48 +12,48 @@ def get_batches(context, iterable, nb):
     start = ssize*bsize
     for i in iterable:
         count += 1
-        if start+bsize*nb <= count-1 <= start++bsize*nb+bsize-1:     # for now takes only the first batch 
+        if start+bsize*nb <= count-1 <= start++bsize*nb+bsize-1:      	# for now takes only the first batch 
             yield i
 
 def run_in_batches(context, iterable, process_one):
     bmax = context.max_batches
-    tot_result = []
-    for nbatch in range(0,bmax):				      # for each batch launches the pipeline (get-batches and process)
+    tot_tot_result = []
+    for nbatch in range(0,bmax):
+        tot_result = []				     			# for each batch launches the pipeline (get-batches and process)
         got_batch = get_batches(context, iterable, nbatch)
         for k in got_batch:
        	    result = process_one(k)					# tot_result.append(result) - instead of nesting lists, merge
+            if result == 'skip':
+                continue						# skip empty elements
             tot_result += result
-            statistics(result)
             #yield k							# yield for statistics function (in pipeline) but then i cannot return tot_result? TODO
-        end_batch(context,nbatch)					
-    return tot_result
+        if len(tot_result) > 0:
+            statistics(nbatch, tot_result)				# stastistics are done within each batch but i'd like to skip empty batches!
+            tot_tot_result += tot_result				# add the batch to the final result										
+            end_batch(context, nbatch)					# check if is ok to skip empty batches like that
+    return tot_tot_result
 
 # context.sess.add(result) is done out in the real process_one function (e.g. do_one)
 
 # call the end_batch function:
 def end_batch(context, nb):
+    print ("end batch number", nb+1)
     pass
-    #print "end batch number", nb
     #context.sess.flush()
 
 # statistics performed for each batch - yield got_batch and use .next() for elements and call statistics(got_batch) TODO 
-def statistics(res):					
+def statistics(nb, res):					
    ok = 0
    not_ok = 0
    tot = 0
-   if res:
-       tot = tot+1
-       if res is not None:						# add option if result == 'skip' then continue
+   for k in res:
+       if k:
+           tot = tot+1
+       if len(k) > 0:						# add option if result == 'skip' then continue
            ok = ok+1
        else:
-           not_ok = not_ok+1
-   print ('IMPORTED {} of {} ({:.1%} success rate)'.format(ok, tot, ok/(float(tot) + 0.00001)))
+           not_ok = not_ok+1 
+   print ('FOR BATCH {} IMPORTED {} of {} elements ({:.1%} success rate)'.format(nb+1, ok, tot, ok/(float(tot) + 0.00001)))
    #context.prob() # "problems for this batch are", not_ok
 
-  # for k in got_batch:
-  #     tot = tot+1
-  #     if k is not None:						# add option if result == 'skip' then continue
-   #        ok = ok+1
-   #    else:
-   #        not_ok = not_ok+1
 
