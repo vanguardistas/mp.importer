@@ -12,9 +12,11 @@ def get_batches(context, iterable, nb):
     start = ssize*bsize
     for i in iterable:
         count += 1
-        if start+bsize*nb <= count-1 <= start+bsize*nb+bsize-1:      	# filter for yielding - takes the nb-batch 
+        if start+bsize*nb <= count <= start+bsize*nb+bsize:      	# filter for yielding - takes the nb-batch 
             print ("batch element", i)
             yield i
+        else:
+            print ('not in batch', i)
 
 def run_in_batches(context, iterable, end_batch):
     bmax = context.max_batches
@@ -26,7 +28,9 @@ def run_in_batches(context, iterable, end_batch):
             c = c+1							# counter 					
             print (c, k)
             yield k							# in the yielded batch, appends X in the right place
-            if c == context.batch_size:
+            if c < context.batch_size:
+                continue						
+            else:
                 end_batch()						# appends 'X' when batch ends
                 break
 
