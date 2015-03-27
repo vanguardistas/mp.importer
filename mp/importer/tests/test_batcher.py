@@ -24,12 +24,12 @@ class TestBatcher(TestCase):
         context = make_test_context(2,0,2)
         batcher = batcher.run_in_batches(		# reads from iterable., creates batches and executes end_batch at the end of each one
                 context,
-                iter('abcdef'), end_batch)
+                iter('abcdefghilm'), end_batch)			# ghilm
         for letter in batcher:				# takes the letter yielded by run_in_batches
             log.append(letter)
         self.assertEqual(
                 ''.join(log),
-                'abXcd')
+                'abXcdX')
 
 
 

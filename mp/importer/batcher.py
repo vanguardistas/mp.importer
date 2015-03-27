@@ -6,17 +6,19 @@ from itertools import *
 from itertools import count
 
 def get_batches(context, iterable, nb):
-    count = 0
     bsize = context.batch_size
     ssize = context.start_batch
     start = ssize*bsize
+    count = start+bsize*nb						# every time the counter must be set in order to retrieve the correct batch and for the generator to be looped consecutively
     for i in iterable:
         count += 1
-        if start+bsize*nb <= count <= start+bsize*nb+bsize:      	# filter for yielding - takes the nb-batch 
-            print ("batch element", i)
-            yield i
-        else:
-            print ('not in batch', i)
+        if start+bsize*nb <= count-1 <= start+bsize*nb+bsize:      	# filter for yielding - takes the nb-batch 
+            if count == start+bsize*nb+bsize:
+                print ("LAST batch element", i)
+                yield i
+            else:
+                print ("batch element", i)
+                yield i            
 
 def run_in_batches(context, iterable, end_batch):
     bmax = context.max_batches
