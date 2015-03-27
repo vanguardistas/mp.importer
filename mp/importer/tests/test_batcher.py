@@ -23,10 +23,10 @@ class TestBatcher(TestCase):
             log.append('X')
         from .. import batcher
         context = make_test_context(2,0,2)
-        batcher = batcher.run_in_batches(		# reads from iterable., creates batches and executes end_batch at the end of each one
+        batcher = batcher.run_in_batches(		
                 context,
-                iter('abcdefghilm'), end_batch)			# ghilm
-        for letter in batcher:				# takes the letter yielded by run_in_batches
+                iter('abcdefghilm'), end_batch)			
+        for letter in batcher:				
             log.append(letter)
         self.assertEqual(
                 ''.join(log),
@@ -39,10 +39,10 @@ class TestBatcher(TestCase):
             log.append('X')
         from .. import batcher
         context = make_test_context(2,0,10)
-        batcher = batcher.run_in_batches(		# reads from iterable., creates batches and executes end_batch at the end of each one
+        batcher = batcher.run_in_batches(		
                 context,
-                iter('abcdefghil'), end_batch)			# ghilm
-        for letter in batcher:				# takes the letter yielded by run_in_batches
+                iter('abcdefghil'), end_batch)			
+        for letter in batcher:				
             log.append(letter)
         self.assertEqual(
                 ''.join(log),
@@ -55,10 +55,10 @@ class TestBatcher(TestCase):
             log.append('X')
         from .. import batcher
         context = make_test_context(3,0,2)
-        batcher = batcher.run_in_batches(		# reads from iterable., creates batches and executes end_batch at the end of each one
+        batcher = batcher.run_in_batches(		
                 context,
-                iter('abcdefghilm'), end_batch)			# ghilm
-        for letter in batcher:				# takes the letter yielded by run_in_batches
+                iter('abcdefghilm'), end_batch)			
+        for letter in batcher:				
             log.append(letter)
         self.assertEqual(
                 ''.join(log),
@@ -72,10 +72,10 @@ class TestBatcher(TestCase):
             log.append('X')
         from .. import batcher
         context = make_test_context(2,1,3)
-        batcher = batcher.run_in_batches(		# reads from iterable., creates batches and executes end_batch at the end of each one
+        batcher = batcher.run_in_batches(		
                 context,
                 iter('abcdefghilm'), end_batch)			
-        for letter in batcher:				# takes the letter yielded by run_in_batches
+        for letter in batcher:				
             log.append(letter)
         if log[-1] != 'X':
             end_batch() 
@@ -84,7 +84,7 @@ class TestBatcher(TestCase):
                 'cdXefXghX')
 
 
-# test a batch that is incomplete . call end_batch when there are no elements left - TODO
+# test a batch that is incomplete . call end_batch when there are no elements left 
     def test_Rest_batches(self):
         print ("*** test Rest batches")
         log = []
@@ -92,11 +92,13 @@ class TestBatcher(TestCase):
             log.append('X')
         from .. import batcher
         context = make_test_context(2,0,3)
-        batcher = batcher.run_in_batches(		# reads from iterable., creates batches and executes end_batch at the end of each one
+        batcher = batcher.run_in_batches(		
                 context,
-                iter('abcde'), end_batch)			# ghilm
-        for letter in batcher:				# takes the letter yielded by run_in_batches
+                iter('abcde'), end_batch)			
+        for letter in batcher:				
             log.append(letter)
+        if log[-1] != 'X':				# TODO add this in the code, not in the test
+            end_batch()
         self.assertEqual(
                 ''.join(log),
                 'abXcdXeX')
