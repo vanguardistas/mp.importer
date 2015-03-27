@@ -32,22 +32,56 @@ class TestBatcher(TestCase):
                 ''.join(log),
                 'abXcdX')
 
-# test how to start batch from a given batch number - TODO
+    def test_Max_batches(self):
+        print ("*** test Max batches")
+        log = []
+        def end_batch():				
+            log.append('X')
+        from .. import batcher
+        context = make_test_context(2,0,10)
+        batcher = batcher.run_in_batches(		# reads from iterable., creates batches and executes end_batch at the end of each one
+                context,
+                iter('abcdefghil'), end_batch)			# ghilm
+        for letter in batcher:				# takes the letter yielded by run_in_batches
+            log.append(letter)
+        self.assertEqual(
+                ''.join(log),
+                'abXcdXefXghXilX')
+
+    def test_Size_batches(self):
+        print ("*** test Size batches")
+        log = []
+        def end_batch():				
+            log.append('X')
+        from .. import batcher
+        context = make_test_context(3,0,2)
+        batcher = batcher.run_in_batches(		# reads from iterable., creates batches and executes end_batch at the end of each one
+                context,
+                iter('abcdefghilm'), end_batch)			# ghilm
+        for letter in batcher:				# takes the letter yielded by run_in_batches
+            log.append(letter)
+        self.assertEqual(
+                ''.join(log),
+                'abcXdefX')
+
+# test how to start batch from a given batch number
     def test_Start_batches(self):
         print ("*** test Start batches")
         log = []
         def end_batch():				
             log.append('X')
         from .. import batcher
-        context = make_test_context(2,1,2)
+        context = make_test_context(2,1,3)
         batcher = batcher.run_in_batches(		# reads from iterable., creates batches and executes end_batch at the end of each one
                 context,
                 iter('abcdefghilm'), end_batch)			
         for letter in batcher:				# takes the letter yielded by run_in_batches
             log.append(letter)
+        if log[-1] != 'X':
+            end_batch() 
         self.assertEqual(
                 ''.join(log),
-                'cdXefX')
+                'cdXefXghX')
 
 
 # test a batch that is incomplete . call end_batch when there are no elements left - TODO
@@ -57,7 +91,7 @@ class TestBatcher(TestCase):
         def end_batch():				
             log.append('X')
         from .. import batcher
-        context = make_test_context(2,0,2)
+        context = make_test_context(2,0,3)
         batcher = batcher.run_in_batches(		# reads from iterable., creates batches and executes end_batch at the end of each one
                 context,
                 iter('abcde'), end_batch)			# ghilm
@@ -66,7 +100,6 @@ class TestBatcher(TestCase):
         self.assertEqual(
                 ''.join(log),
                 'abXcdXeX')
-
 
 
 
