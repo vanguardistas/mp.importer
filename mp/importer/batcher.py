@@ -14,20 +14,14 @@ def get_batches(context, iterable, nb):
         for i in iterable:
             count +=1
             if start+bsize*nb <= count-1 <= start+bsize*nb+bsize:      	# filter for yielding - in this loop i skip the first batch of size "start" = startbatch*bsize
-                if count == start+bsize*nb+bsize:
-                    yield i
-                else:
-                    yield i 
+                yield i
             else:
                 continue           
     else:
         for i in iterable:
             count +=1
-            if bsize*nb <= count-1 <= bsize*nb+bsize:      	
-                if count == bsize*nb+bsize:
-                    yield i
-                else:
-                    yield i 
+            if bsize*nb <= count-1 <= bsize*nb+bsize: 
+                yield i     	 
             else:
                 continue
 
@@ -35,7 +29,7 @@ def run_in_batches(context, iterable, end_batch):
     bmax = context.max_batches
     for nbatch in range(0,bmax):
         c = 0 
-        got_batch = get_batches(context, iterable, nbatch)		
+        got_batch = get_batches(context, iterable, nbatch)		# gets batch elements (yields) for each value of nbatch - changes at every iteration
         for k in got_batch:
             c = c+1							 					
             yield k							
