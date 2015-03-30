@@ -28,7 +28,7 @@ class TestBatcher(TestCase):
                 source, end_batch)          
         for letter in batcher:              
             log.append(letter)
-        print ("log is", log)
+        #print ("log is", log)
         if log[-1] != 'X':
             end_batch()
         return ''.join(log)
@@ -48,6 +48,17 @@ class TestBatcher(TestCase):
     def test_Batch_size(self):
         result = self.one('abcdefg', batch_size=3, max_batches=2)
         self.assertEqual(result, 'abcXdefX')
+
+    def test_With_csv(self):
+        filename = '/home/kiara/GIT/mp.importer/mp/importer/tests/test.csv'
+        openedfile = open(filename, 'r')
+        iterable = list()
+        for row in openedfile:
+            test_row = row[:-1]									 
+            iterable.append(test_row)
+            result = self.one(iterable, batch_start=0, max_batches=1)
+        self.assertEqual(result, 'chiara-anna-X')			# batch_size = 2, takes the first two elements of the list (first and second row of csv)
+
 
 
 

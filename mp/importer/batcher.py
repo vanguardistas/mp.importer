@@ -26,7 +26,7 @@ def run_in_batches(context, iterable, end_batch):
             c = c+1							 											
             current_batch, position_in_batch = divmod(c, context.batch_size)
             current_batch += 1
-            print ("current_batch, position_in_batch, k", current_batch, position_in_batch, k)			
+            #print ("current_batch, position_in_batch, k", current_batch, position_in_batch, k)			
             yield k
             if position_in_batch == 0:
                 end_batch()
