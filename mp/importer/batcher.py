@@ -19,17 +19,18 @@ def get_batches(context, iterable, nb):
 
 def run_in_batches(context, iterable, end_batch):
     bmax = context.max_batches
-    for nbatch in range(0,bmax):					# TODO change according to Brian suggestion
-        c = 0 
+    c = 0
+    for nbatch in range(0,bmax):					# TODO set default value, cannot be None
         got_batch = get_batches(context, iterable, nbatch)		# gets batch elements (yields) for each value of nbatch 
         for k in got_batch:
             c = c+1							 					
             yield k							
-            if c < context.batch_size: 
-                continue						
-            elif c == context.batch_size:
-                end_batch()						
-                break         
+            current_batch, position_in_batch = divmod(c, context.batch_size)
+            current_batch += 1
+            print ("current_batch, position_in_batch", current_batch, position_in_batch)
+            if position_in_batch == 0:
+                end_batch()
+                break               
 
                 
 # hmm, I wonder why we are iterating over the batches, surely it is simpler to just iterate over the iterator directly?
