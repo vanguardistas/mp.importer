@@ -33,16 +33,16 @@ class TestBatcher(TestCase):
         return ''.join(log)
 
     def test_batches(self):
-        result = self.one('abcdefg', max_batches=100)			# check it with None when changed the code 
+        result = self.one('abcdefg', max_batches=10)			# check it with None when changed the code (default is None)
         self.assertEqual(result, 'abXcdXefXgX')
 
     def test_Max_batches(self):
         result = self.one('abcdefg', max_batches=2)
         self.assertEqual(result, 'abXcdX')
 
-    #def test_Start_batch(self):
-    #    result = self.one('abcdefg', batch_start=1, max_batches=2)
-    #    self.assertEqual(result, 'cdXefX')
+    def test_Start_batch(self):
+        result = self.one('abcdefg', batch_start=1, max_batches=2)
+        self.assertEqual(result, 'cdXefX')
 
 
 
