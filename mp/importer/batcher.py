@@ -5,30 +5,31 @@
 from itertools import *
 from itertools import count
 
-def get_batches(context, iterable, nb):
-    bsize = context.batch_size
-    startbatch = context.start_batch
-    start = startbatch*bsize
+def get_batches(context, iterable, bmax):
     count = 0
     for i in iterable:
         count +=1
-        if start+bsize*nb <= count-1 <= start+bsize*nb+bsize:      	# skip the first batch of size "start" = startbatch*bsize
+        current_batch, position_in_batch = divmod(count, context.batch_size)
+        if current_batch <= bmax:
             yield i
-        else:
-            continue 
 
 def run_in_batches(context, iterable, end_batch):
-    bmax = context.max_batches
     c = 0
-    for nbatch in range(0,bmax):					# TODO set default value, cannot be None
-        got_batch = get_batches(context, iterable, nbatch)		# gets batch elements (yields) for each value of nbatch 
-        for k in got_batch:	
-            c = c+1							 											
-            current_batch, position_in_batch = divmod(c, context.batch_size)
-            current_batch += 1
-            #print ("current_batch, position_in_batch, k", current_batch, position_in_batch, k)			
+    start = context.start_batch
+    bmax = context.max_batches
+    for k in get_batches(context, iterable, bmax):							# yields elements for this batch					
+        c = c+1			
+        current_batch, position_in_batch = divmod(c, context.batch_size)
+        if current_batch == start-1 or (current_batch == start and position_in_batch==0):  
+            print ("current batch, skip batch",  current_batch, start)
+            pass
+        else:
             yield k
             if position_in_batch == 0:
                 end_batch()
-                break               
+                if current_batch == bmax:
+                    break   
 
+#if current_batch<start or (current_batch<=start and position_in_batch==0):		# do not yield value in batch to be skipped
+
+#        print ("current_batch, position_in_batch", current_batch, position_in_batch)
