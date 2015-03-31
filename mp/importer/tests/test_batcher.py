@@ -32,23 +32,28 @@ class TestBatcher(TestCase):
             end_batch()
         return ''.join(log)
 
-    def test_batches(self):
+    def test_Make_batches(self):
+        print ("*** launch Make_batches")
         result = self.one('abcdefg')			# check it with None when changed the code (default is None)
         self.assertEqual(result, 'abXcdXefXgX')
 
     def test_Max_batches(self):
+        print ("*** launch Max_batches")
         result = self.one('abcdefg', max_batches=2)
         self.assertEqual(result, 'abXcdX')
 
     def test_Batch_size(self):
+        print ("*** launch Batch_size")
         result = self.one('abcdefg', batch_size=3, max_batches=2)
         self.assertEqual(result, 'abcXdefX')
 
     def test_Start_batch(self):
+        print ("*** launch Start_batch")
         result = self.one('abcdefg', batch_start=1, max_batches=2)  # batch_start=1 means skipping the first batch (the 0-batch)
         self.assertEqual(result, 'cdXefX')
 
     def test_With_csv(self):
+        print ("*** launch With_csv")
         filename = '/home/kiara/GIT/mp.importer/mp/importer/tests/test.csv'
         openedfile = open(filename, 'r')
         iterable = list()
