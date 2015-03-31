@@ -49,19 +49,9 @@ class TestBatcher(TestCase):
 
     def test_Start_batch(self):
         print ("*** launch Start_batch")
-        result = self.one('abcdefg', batch_start=1, max_batches=2)  # batch_start=1 means skipping the first batch (the 0-batch)
-        self.assertEqual(result, 'cdXefX')
+        result = self.one('abcdefg', batch_start=2, max_batches=3)  # batch_start=1 means skipping the first batch (the 0-batch)
+        self.assertEqual(result, 'efXgX')
 
-    def test_With_csv(self):
-        print ("*** launch With_csv")
-        filename = '/home/kiara/GIT/mp.importer/mp/importer/tests/test.csv'
-        openedfile = open(filename, 'r')
-        iterable = list()
-        for row in openedfile:
-            test_row = row[:-1]									 
-            iterable.append(test_row)
-            result = self.one(iterable, batch_start=0, max_batches=1)
-        self.assertEqual(result, 'chiara-anna-X')			# batch_size = 2, takes the first two elements of the list (first and second row of csv)
 
 
 

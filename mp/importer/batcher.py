@@ -10,12 +10,11 @@ def get_batches(context, iterable, bmax, bstart):
     for i in iterable:
         count +=1
         current_batch, position_in_batch = divmod(count, context.batch_size)
-        print ("current_batch, position_in_batch", current_batch, position_in_batch)
+        if position_in_batch == 0:
+            current_batch = current_batch-1						# the last element of a batch has position 0 and value (current_batch+1)
         if current_batch >= bstart and current_batch <= bmax:
             yield i
-
-# or not(current_batch+1==bstart and position_in_batch==0)) 
-
+ 
 def run_in_batches(context, iterable, end_batch):
     c = 0
     bstart = context.start_batch
@@ -29,14 +28,4 @@ def run_in_batches(context, iterable, end_batch):
             if current_batch == bmax:
                 break   
 
-
-
-
-
-        #if current_batch == start-1 or (current_batch == start and position_in_batch==0):  
-        #    print ("current batch, skip batch",  current_batch, start)
-        #    pass
-        #else:
-
-#if current_batch<start or (current_batch<=start and position_in_batch==0):		# do not yield value in batch to be skipped
 
