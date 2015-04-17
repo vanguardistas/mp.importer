@@ -1,10 +1,3 @@
-# this function is intentionally get empty for now
-# this program takes an iterable and splits in a number of batches using context arguments
-# result of the run_in_batches is that each batch element is yielded and passed to the process_one function 
-
-from itertools import *
-from itertools import count
-
 def get_batches(context, iterable, bmax, bstart):
     count = 0
     for i in iterable:
