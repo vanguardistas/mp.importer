@@ -28,14 +28,14 @@ class TestBatcher(TestCase):
                 source, end_batch)          
         for letter in batcher:              
             log.append(letter)
-        if log[-1] != 'X':
-            end_batch()
+        #if log[-1] != 'X':			# remove this and add it in the real function - we want end_batch to be called if iterable finished - TODO
+        #    end_batch()
         return ''.join(log)
 
     def test_Make_batches(self):
         print ("*** launch Make_batches")
         result = self.one('abcdefg')			# check it with None when changed the code (default is None)
-        self.assertEqual(result, 'abXcdXefXgX')
+        self.assertEqual(result, 'abXcdXefXgX')		
 
     def test_Max_batches(self):
         print ("*** launch Max_batches")
@@ -50,7 +50,7 @@ class TestBatcher(TestCase):
     def test_Start_batch(self):
         print ("*** launch Start_batch")
         result = self.one('abcdefg', batch_start=2, max_batches=3)  # batch_start=1 means skipping the first batch (the 0-batch)
-        self.assertEqual(result, 'efXgX')
+        self.assertEqual(result, 'efXgX')		
 
 
 
