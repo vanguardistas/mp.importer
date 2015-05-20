@@ -9,11 +9,11 @@ def run_in_batches(context, iterable, end_batch):
             current_batch = current_batch-1						# last element of a batch: position=0, value=current_batch+1
         if current_batch >= bstart and current_batch < bstart+bmax:
             yield k 
-            if position_in_batch == 0: 
+            if position_in_batch == 0: 							# ends all completed batches
                 end_batch()
-        if current_batch == bstart+bmax:
+        if current_batch == bstart+bmax:						# if gets maximum allowed batches, break 
             break 
-
-	# TODO end imcomplete batches with 'X' (remove from "one")
+    end_batch()							# if iterator has finished, or if break because of max_batches, end_batch()
+                
 
 
