@@ -1,20 +1,22 @@
-def run_in_batches(context, iterable, end_batch):					# TODO remove context and pass parameters
+
+def run_in_batches(iterable, end_batch_callback, batch_size, start_batch, max_batches):					# arguments passed directly (can be passed through options)
     c = 0
     ended = False
-    bstart = context.start_batch
-    bmax = context.max_batches
     for k in iterable:
         c = c+1			
-        current_batch, position_in_batch = divmod(c, context.batch_size)
+        current_batch, position_in_batch = divmod(c, batch_size)
         if position_in_batch == 0:
             current_batch = current_batch-1						# last element of a batch has position=0, value=current_batch+1
-        if current_batch >= bstart and current_batch < bstart+bmax:
+        if current_batch >= start_batch and current_batch < start_batch+max_batches:
             ended = False
             yield k 
             if position_in_batch == 0: 							# ends completed batches
-                end_batch()
+                end_batch_callback()
                 ended = True
-        if current_batch == bstart+bmax:						# if gets maximum allowed batches, break 
+        if current_batch == start_batch+max_batches:						# if gets maximum allowed batches, break 
             break
     if ended is False:
-        end_batch()	
+        end_batch_callback()	
+
+
+

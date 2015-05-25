@@ -5,15 +5,15 @@ from collections import namedtuple
 from collections import Iterable
 from itertools import *
 
-def make_test_context(b_size, b_start, b_max):									# creates a "provisional" context 
-    context = namedtuple('Context', """
+def make_test_options(b_size, b_start, b_max):									# creates a "provisional" options
+    options = namedtuple('Options', """
         batch_size
         start_batch
         max_batches """)
-    context.batch_size = b_size
-    context.start_batch = b_start
-    context.max_batches = b_max
-    return context
+    options.batch_size = b_size
+    options.start_batch = b_start
+    options.max_batches = b_max
+    return options
 
 class TestBatcher(TestCase):
 
@@ -22,10 +22,8 @@ class TestBatcher(TestCase):
         def end_batch():                
             log.append('X')
         from .. import batcher
-        context = make_test_context(batch_size, batch_start, max_batches)
-        batcher = batcher.run_in_batches(       
-                context,
-                source, end_batch)          
+        options = make_test_options(batch_size, batch_start, max_batches)
+        batcher = batcher.run_in_batches(source, end_batch, options.batch_size, options.start_batch, options.max_batches)        
         for letter in batcher:              
             log.append(letter)
         return ''.join(log)
