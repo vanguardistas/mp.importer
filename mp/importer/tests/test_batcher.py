@@ -38,12 +38,12 @@ class TestBatcher(TestCase):
     def test_Max_batches(self):
         print ("*** launch Max_batches")
         result = self.one('abcdefg', max_batches=2)
-        self.assertEqual(result, 'abXcdXX')
+        self.assertEqual(result, 'abXcdX')
 
     def test_Batch_size(self):
         print ("*** launch Batch_size")
         result = self.one('abcdefg', batch_size=3, max_batches=2)
-        self.assertEqual(result, 'abcXdefXX')
+        self.assertEqual(result, 'abcXdefX')
 
     def test_Start_batch(self):
         print ("*** launch Start_batch")
