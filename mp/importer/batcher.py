@@ -1,5 +1,5 @@
 
-def run_in_batches(iterable, end_batch_callback, batch_size, start_batch, max_batches):					# arguments passed directly (can be passed through options)
+def run_in_batches(iterable, end_batch_callback, batch_size, start_batch, max_batches):					# arguments passed through "options"
     c = 0
     ended = False
     for k in iterable:
@@ -19,4 +19,7 @@ def run_in_batches(iterable, end_batch_callback, batch_size, start_batch, max_ba
         end_batch_callback()	
 
 
+def run_in_batches_with_options(iterable, end_batch_callback, options):
+    for x in run_in_batches (iterable, end_batch_callback, options.batch_size, options.start_batch, options.max_batches):
+        yield x
 

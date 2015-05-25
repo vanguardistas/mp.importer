@@ -23,7 +23,7 @@ class TestBatcher(TestCase):
             log.append('X')
         from .. import batcher
         options = make_test_options(batch_size, batch_start, max_batches)
-        batcher = batcher.run_in_batches(source, end_batch, options.batch_size, options.start_batch, options.max_batches)        
+        batcher = batcher.run_in_batches_with_options(source, end_batch, options)
         for letter in batcher:              
             log.append(letter)
         return ''.join(log)
