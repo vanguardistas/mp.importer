@@ -5,7 +5,7 @@ from collections import namedtuple
 from collections import Iterable
 from itertools import *
 
-def make_test_options(batch_size=2, batch_start=0, max_batches=10):							# creates a "provisional" options, set default in case **kw none 
+def make_test_options(batch_size=2, batch_start=0, max_batches=10):							# "provisional" options, default in case **kw none - TODO batch_size!=0 
     options = namedtuple('Options', "batch_size, start_batch, max_batches")
     options.batch_size = batch_size
     options.batch_start = batch_start
@@ -19,8 +19,9 @@ class TestBatcher(TestCase):
         def end_batch():                
             log.append('X')
         from .. import batcher
-        options = make_test_options(**kw)							#batch_size, batch_start, max_batches)
-        batcher = batcher.run_in_batches_with_options(source, end_batch, options) 		
+        #options = make_test_options(**kw)							# pass object to batcher (still an option)
+        #batcher = batcher.run_in_batches_with_options(source, end_batch, options) 
+        batcher = batcher.run_in_batches(source, end_batch, **kw)				# pass direclty **kw to batcher
         for letter in batcher:              
             log.append(letter)
         return ''.join(log)
@@ -28,6 +29,10 @@ class TestBatcher(TestCase):
     def test_Make_batches(self):
         result = self.one('abcdefg')			
         self.assertEqual(result, 'abXcdXefXgX')		
+
+    def test_Make_big_batches(self):								# one incomplete batch of maximum 1000 elements
+        result = self.one('abcdefg', batch_size=1000)			
+        self.assertEqual(result, 'abcdefgX')
 
     def test_Max_batches(self):
         result = self.one('abcdefg', max_batches=2)

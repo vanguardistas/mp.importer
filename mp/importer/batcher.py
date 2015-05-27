@@ -1,5 +1,5 @@
 
-def run_in_batches(iterable, end_batch_callback=None, batch_size=1000, batch_start=0, max_batches=None):		# arguments passed through "options", set default - NB batch_size!=0
+def run_in_batches(iterable, end_batch_callback=None, batch_size=2, batch_start=0, max_batches=10000):		# what if max_batches = None? TODO
     c = 0
     ended = False
     for k in iterable:
@@ -13,13 +13,13 @@ def run_in_batches(iterable, end_batch_callback=None, batch_size=1000, batch_sta
             if position_in_batch == 0: 							# ends completed batches
                 end_batch_callback()
                 ended = True
-        if current_batch == batch_start+max_batches:						# if gets maximum allowed batches, break 
+        if current_batch == batch_start+max_batches:					# if gets maximum allowed batches, break 
             break
     if ended is False:
         end_batch_callback()	
 
 
-def run_in_batches_with_options(iterable, end_batch_callback, options): 	
-    for x in run_in_batches(iterable, end_batch_callback, options.batch_size, options.batch_start, options.max_batches):	# use **kw here as well? so not specified options are default
+def run_in_batches_with_options(iterable, end_batch_callback, options): 		# arguments can be passed through "options"
+    for x in run_in_batches(iterable, end_batch_callback, options.batch_size, options.batch_start, options.max_batches):	
         yield x
 
