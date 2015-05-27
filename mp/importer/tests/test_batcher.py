@@ -5,13 +5,6 @@ from collections import namedtuple
 from collections import Iterable
 from itertools import *
 
-def make_test_options(batch_size=2, batch_start=0, max_batches=10):							# "provisional" options, default in case **kw none - TODO batch_size!=0 
-    options = namedtuple('Options', "batch_size, start_batch, max_batches")
-    options.batch_size = batch_size
-    options.batch_start = batch_start
-    options.max_batches = max_batches
-    return options
-
 class TestBatcher(TestCase):
 
     def one(self, source, **kw): 								# **kw allows passing only some keyworks (the others will be set to default by batcher) -easier for user
@@ -19,8 +12,6 @@ class TestBatcher(TestCase):
         def end_batch():                
             log.append('X')
         from .. import batcher
-        #options = make_test_options(**kw)							# pass object to batcher (still an option)
-        #batcher = batcher.run_in_batches_with_options(source, end_batch, options) 
         batcher = batcher.run_in_batches(source, end_batch, **kw)				# pass direclty **kw to batcher
         for letter in batcher:              
             log.append(letter)
