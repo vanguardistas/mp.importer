@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
-""" This module contains utilities for creating batches of elements from an iterable
-    user can select the batch size, the maximum number of batches and the starting batch from which to start yielding elements
-    soon it will be possible to randomly sample elements to create batches and to retrieve the last batch (in order to reproduce some process) 
+""" Create batches of elements from and iterable
+
+This module contains utilities for creating batches of elements from an iterable
+The user can select the batch size, the maximum number of batches and the starting batch for yielding elements
+Other function will be added to randomly sample elements and to retrieve the last batch  
 """
 
 def run_in_batches(iterable, end_batch_callback=None, batch_size=2, batch_start=0, max_batches=None):	
-    """ This function is a generator that creates batches of elements from an iterable. 
-        The callback function is called when a) maximum batches are reached or b) iterable is exhausted (ends incomplete batches)
-        """ 	
+    """ Create batches from an iterable
+   
+    This function is a generator that creates batches of elements from an iterable 
+    The callback function is called when a) maximum batches are reached or b) iterable is exhausted 
+    All batches (complete and incomplete) are ended by a callback function
+    """ 	
     c = 0
     ended = False
     for k in iterable:
