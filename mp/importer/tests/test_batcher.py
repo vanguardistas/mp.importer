@@ -42,5 +42,25 @@ class TestBatcher(TestCase):
         self.assertEqual(result, 'abXcX')
 
 
+    def test_Parse_arguments(self):
+        from .. import batcher
+        args = [10]
+        result = batcher.parse_arguments(args)
+        self.assertEqual(result, 10)
+
+    def test_Get_batcher_args(self):
+        from .. import batcher
+        options = {'argument_1' : 10}						# for now options is a dictionary (that is result of parse_arguments) but should be an object!?
+        result = batcher.get_batcher_args(options)
+        self.assertEqual(result, 10)
+
+
+
+
+
+
+
+
+
 
 

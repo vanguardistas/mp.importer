@@ -32,3 +32,39 @@ def run_in_batches(iterable, end_batch_callback=None, batch_size=2, batch_start=
         end_batch_callback()	
 
 
+def parse_arguments(parser):	
+    """ Parse arguments from user
+
+    This function parses user input and returns the object args that contains arguments
+    """
+    import argparse
+    parser = argparse.ArgumentParser(description='Pass custom parameters to batcher')
+    parser.add_argument('argument_1', type=int, help='first argument for batches')
+    options = parser.parse_args()
+    return options
+
+
+def get_batcher_args(options):
+    """ Takes options and passes arguments to batcher
+
+    Gets arguments parsed by parse_arguments to be passed as keywords to run_in_batches
+    e.g. run_in_batches(iterable, end_batch, **get_batcher_args(options))
+    """ 
+    kw = dict()
+    if options.argument_1:
+        kw['argument_1'] = options.argument_1
+    # same for all arguments
+    return kw
+
+#options is like this:
+#Namespace(batch_size=3, commit=False, db='test_batcher', db_host=None, from_db='postgresql:///cityscene', locations=None, loglevel=20, max_batches=1, pages=None, problems='/home/kiara/test_batcher/importer/logs/import_problems.csv', random_batcher=None, start_imp_batch=None, with_blobs=False, with_locations=False)
+
+
+
+
+
+
+
+
+
+
