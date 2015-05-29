@@ -5,9 +5,21 @@ from collections import namedtuple
 from collections import Iterable
 from itertools import *
 
+
+def create_test_options(args=None):							# this function is similar to Parse_arguments: it takes a list of arguments, creates a parser and returns it 
+    import argparse
+    parser = argparse.ArgumentParser()	
+    parser.add_argument('--argument_1', dest='argument_1', type=int, help="First arg")
+    options = None
+    if args is not None: 
+        options = parser.parse_args(args)
+        #print ("options.argument_1 is: ", options.argument_1)
+    return options 
+
+
 class TestBatcher(TestCase):
 
-    def one(self, source, **kw): 								# **kw allows passing only some keyworks (the others will be set to default by batcher) -easier for user
+    def one(self, source, **kw): 								# **kw allows passing only some keyworks (the others will be set to default by batcher), easier for user
         log = []
         def end_batch():                
             log.append('X')
@@ -44,20 +56,26 @@ class TestBatcher(TestCase):
 
     def test_Parse_arguments(self):
         from .. import batcher
-        args = [10]
-        result = batcher.parse_arguments(args)
+        args =  ["--argument_1", "10"]	 								#TODO pass the input such as in command line: args = ['--argument_1 10','--argument_2 20']
+        options = batcher.parse_arguments(args)
+        #print options  										# option is Namespace(argument_1=10),  self.assertIsInstance(options, dict)?
+        result = options.argument_1
         self.assertEqual(result, 10)
+
 
     def test_Get_batcher_args(self):
         from .. import batcher
-        options = {'argument_1' : 10}						# for now options is a dictionary (that is result of parse_arguments) but should be an object!?
-        result = batcher.get_batcher_args(options)
-        self.assertEqual(result, 10)
+        args = ["--argument_1", "10"]									#TODO pass the input such as in command line				
+        #options = create_test_options(args)								# similar to calling parse_arguments, but the test version, but i can test both functions here
+        options = batcher.parse_arguments(args)
+        result = batcher.get_batcher_args(options)							# options is a namespace returned by argparse, batcher_args is a dictionary **kw
+        self.assertEqual(result, {'argument_1':10})
+
+ 
 
 
-
-
-
+# NB: options is an object like this:
+#Namespace(batch_size=3, commit=False, db='test_batcher', db_host=None, from_db='postgresql:///cityscene', locations=None, loglevel=20, max_batches=1, pages=None, problems='/home/kiara/test_batcher/importer/logs/import_problems.csv', random_batcher=None, start_imp_batch=None, with_blobs=False, with_locations=False)
 
 
 

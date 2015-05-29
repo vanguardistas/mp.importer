@@ -32,31 +32,34 @@ def run_in_batches(iterable, end_batch_callback=None, batch_size=2, batch_start=
         end_batch_callback()	
 
 
-def parse_arguments(parser):	
+def parse_arguments(args=None):		 								# receives a parser with all the arguments and create a parser with only batcher args	
     """ Parse arguments from user
 
     This function parses user input and returns the object args that contains arguments
     """
     import argparse
-    parser = argparse.ArgumentParser(description='Pass custom parameters to batcher')
-    parser.add_argument('argument_1', type=int, help='first argument for batches')
-    options = parser.parse_args()
-    return options
+    parser = argparse.ArgumentParser(description='Pass arguments to batcher')				
+    parser.add_argument('--argument_1', dest='argument_1', type=int, help="First arg")
+    options = None
+    if args is not None: 
+        options = parser.parse_args(args)								# need to skip the first argument (script name)? if so, args[:1]
+    return options			 
 
 
-def get_batcher_args(options):
+def get_batcher_args(options):									
     """ Takes options and passes arguments to batcher
 
-    Gets arguments parsed by parse_arguments to be passed as keywords to run_in_batches
+    Gets arguments parsed by parse_arguments to be passed as  a dictionary of keywords (**kw) to run_in_batches
     e.g. run_in_batches(iterable, end_batch, **get_batcher_args(options))
     """ 
     kw = dict()
-    if options.argument_1:
+    if options.argument_1:								# options object result of parse_args
         kw['argument_1'] = options.argument_1
-    # same for all arguments
-    return kw
+    return kw										# dictionary of **wk for batcher, e.g. {'argument_1':10, 'argument_2':20}
 
-#options is like this:
+
+
+# NB: options is an object like this:
 #Namespace(batch_size=3, commit=False, db='test_batcher', db_host=None, from_db='postgresql:///cityscene', locations=None, loglevel=20, max_batches=1, pages=None, problems='/home/kiara/test_batcher/importer/logs/import_problems.csv', random_batcher=None, start_imp_batch=None, with_blobs=False, with_locations=False)
 
 
