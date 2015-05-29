@@ -26,23 +26,24 @@ def run_in_batches(iterable, end_batch_callback=None, batch_size=2, batch_start=
             if position_in_batch == 0: 							# ends completed batches
                 end_batch_callback()
                 ended = True
-        if max_batches is not None and current_batch == batch_start + max_batches:					# if gets maximum allowed batches, break 
+        if max_batches is not None and current_batch == batch_start + max_batches:	# if gets maximum allowed batches, break 
             break
     if ended is False:
         end_batch_callback()	
 
 
-def parse_arguments(args=None):		 								# receives a parser with all the arguments and create a parser with only batcher args	
-    """ Parse arguments from user
+def parse_arguments(args=None):		 						# receives a list of all the arguments and create a parser with only batcher args	
+    """ Parse arguments from user									 
 
     This function parses user input and returns the object args that contains arguments
     """
     import argparse
     parser = argparse.ArgumentParser(description='Pass arguments to batcher')				
     parser.add_argument('--argument_1', dest='argument_1', type=int, help="First arg")
+    parser.add_argument('--argument_2', dest='argument_2', type=int, help="2nd argument")
     options = None
     if args is not None: 
-        options = parser.parse_args(args)								# need to skip the first argument (script name)? if so, args[:1]
+        options = parser.parse_args(args)						# need to skip the first argument (script name) if this function receives full args (args[:1])
     return options			 
 
 
@@ -55,12 +56,8 @@ def get_batcher_args(options):
     kw = dict()
     if options.argument_1:								# options object result of parse_args
         kw['argument_1'] = options.argument_1
+        kw['argument_2'] = options.argument_2
     return kw										# dictionary of **wk for batcher, e.g. {'argument_1':10, 'argument_2':20}
-
-
-
-# NB: options is an object like this:
-#Namespace(batch_size=3, commit=False, db='test_batcher', db_host=None, from_db='postgresql:///cityscene', locations=None, loglevel=20, max_batches=1, pages=None, problems='/home/kiara/test_batcher/importer/logs/import_problems.csv', random_batcher=None, start_imp_batch=None, with_blobs=False, with_locations=False)
 
 
 
