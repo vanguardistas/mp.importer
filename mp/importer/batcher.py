@@ -46,7 +46,6 @@ def parse_arguments(args=None):		 						# receives a list of all the arguments a
         options = parser.parse_args(args)						# need to skip the first argument (script name) if this function receives full args (args[:1])
     return options			 
 
-
 def get_batcher_args(options):									
     """ Takes options and passes arguments to batcher
 

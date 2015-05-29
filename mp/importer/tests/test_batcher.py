@@ -60,14 +60,15 @@ class TestBatcher(TestCase):
         result = batcher.get_batcher_args(options)						# options is a namespace returned by argparse, batcher_args is a dictionary **kw
         self.assertEqual(result, {'batcher_argument_1':10 , 'batcher_argument_2':2})
  
-    # TODO make it work directly with output of sys.argv
-    #def test_Get_batcher_args_allstring(self):
-        #from .. import batcher
-        #args = ['./bin/import_from_godengo_batcher.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--argument_1', '10', '--argument_2', '2']				
-        #options = batcher.parse_arguments(args)
-        #result = batcher.get_batcher_args(options)						# options is a namespace returned by argparse, batcher_args is a dictionary **kw
-        #self.assertEqual(result, {'batcher_argument_1':10 , 'batcher_argument_2':2})
- 
+    # TODO make it work directly with output of sys.argv, need to know the script arguments and order - generalize!?
+    def test_Get_batcher_args_allstring(self):
+        from .. import batcher
+        args = ['./bin/import_from_godengo_batcher.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--argument_1', '10', '--argument_2', '2']				
+        newargs = args[5:]
+        print (newargs)
+        options = batcher.parse_arguments(newargs)
+        result = batcher.get_batcher_args(options)						# options is a namespace returned by argparse, batcher_args is a dictionary **kw
+        self.assertEqual(result, {'batcher_argument_1':10 , 'batcher_argument_2':2}) 
 
 
 
