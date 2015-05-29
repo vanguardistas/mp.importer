@@ -39,8 +39,8 @@ def parse_arguments(args=None):		 						# receives a list of all the arguments a
     """
     import argparse
     parser = argparse.ArgumentParser(description='Pass arguments to batcher')				
-    parser.add_argument('--argument_1', dest='argument_1', type=int, help="First arg")
-    parser.add_argument('--argument_2', dest='argument_2', type=int, help="2nd argument")
+    parser.add_argument('--argument_1', dest='batcher_argument_1', type=int, help="1st argument")
+    parser.add_argument('--argument_2', dest='batcher_argument_2', type=int, help="2nd argument")
     options = None
     if args is not None: 
         options = parser.parse_args(args)						# need to skip the first argument (script name) if this function receives full args (args[:1])
@@ -54,13 +54,11 @@ def get_batcher_args(options):
     e.g. run_in_batches(iterable, end_batch, **get_batcher_args(options))
     """ 
     kw = dict()
-    if options.argument_1:								# options object result of parse_args
-        kw['argument_1'] = options.argument_1
-        kw['argument_2'] = options.argument_2
+    if options.batcher_argument_1:								# options object result of parse_args
+        kw['batcher_argument_1'] = options.batcher_argument_1
+    if options.batcher_argument_2:
+        kw['batcher_argument_2'] = options.batcher_argument_2
     return kw										# dictionary of **wk for batcher, e.g. {'argument_1':10, 'argument_2':20}
-
-
-
 
 
 
