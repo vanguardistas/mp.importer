@@ -5,7 +5,6 @@ This module contains utilities for creating batches of elements from an iterable
 The user can select the batch size, the maximum number of batches and the starting batch for yielding elements
 Other function will be added to randomly sample elements and to retrieve the last batch  
 """
-
 def run_in_batches(iterable, end_batch_callback=None, batch_size=2, batch_start=0, max_batches=None):	
     """ Create batches from an iterable
    
@@ -32,40 +31,34 @@ def run_in_batches(iterable, end_batch_callback=None, batch_size=2, batch_start=
         end_batch_callback()	
 
 
-def parse_arguments(args=None):		 						# receives a list of all the arguments and create a parser with only batcher args	
-    """ Parse arguments from user									 
-#
-#    This function parses user input and returns the object args that contains arguments
-#    """
-    import argparse
-    parser = argparse.ArgumentParser(description='Pass arguments to batcher')	
+def new_parse_arguments(parser):		 						
+    """ Adds batcher arguments to the parser									 
+
+    This function gets the parser containing user inputs
+    It adds arguments and returns a parser
+    The parsing of args is performed in the main script 
+    """ 
     parser.add_argument('--argument_1', dest='batcher_argument_1', type=int, help="1st argument")
     parser.add_argument('--argument_2', dest='batcher_argument_2', type=int, help="2nd argument")
-    options = None
-    if args is not None: 
-        options = parser.parse_args(args)						# skip the args that are not for batcher
-    return options			 
+    return parser		 
 
-def new_parse_arguments(parser, args=None):		 						# receives a PARSER from the main script and a list of args - TODO should not take arguments list
-    """ Parse arguments from user									 
 
-    This function gets the parser containing user inputs and returns the namespace with the batcher options
-    """
-    options = None
-    if parser is not None: 
-        options, unknown = parser.parse_known_args(args)						# takes only known args, others go to "unknown" list
-    return options			 
 
 def get_batcher_args(options):									
-    """ Takes options and passes arguments to batcher
+    """ Takes namespace and filters batcher arguments
 
-    Gets arguments parsed by parse_arguments to be passed as  a dictionary of keywords (**kw) to run_in_batches
+    Gets namespace with arguments parsed by parse_arguments 
+    Filters only the batcher arguments 
+    Stores arguments in a dictionary of keywords (**kw) for "run_in_batches"
     e.g. run_in_batches(iterable, end_batch, **get_batcher_args(options))
     """ 
-    kw = vars(options)
-    return kw										# dictionary of **kw for batcher, e.g. {'argument_1':10, 'argument_2':20}
-
-
+    kw_temp = vars(options)
+    kw = dict()										# so dictionary does not change size (error in python 3.4)	
+    for i, j in kw_temp.items():							# filter dictionary to keep only batcher parameters 
+        if i in ('batcher_argument_2', 'batcher_argument_1'):
+            if j is not None:
+                kw.update({i:j})
+    return kw										
 
 
 
