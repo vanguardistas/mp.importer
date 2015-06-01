@@ -46,14 +46,11 @@ def parse_arguments(args=None):		 						# receives a list of all the arguments a
         options = parser.parse_args(args)						# skip the args that are not for batcher
     return options			 
 
-def new_parse_arguments(parser, args):		 						# receives a PARSER from the main script and a list of args - TODO should not take arguments list
+def new_parse_arguments(parser, args=None):		 						# receives a PARSER from the main script and a list of args - TODO should not take arguments list
     """ Parse arguments from user									 
 
     This function gets the parser containing user inputs and returns the namespace with the batcher options
     """
-    import argparse
-    parser.add_argument('--argument_1', dest='batcher_argument_1', type=int, help="1st argument")
-    parser.add_argument('--argument_2', dest='batcher_argument_2', type=int, help="2nd argument")	# reads all arguments passed to the script
     options = None
     if parser is not None: 
         options, unknown = parser.parse_known_args(args)						# takes only known args, others go to "unknown" list

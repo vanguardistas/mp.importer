@@ -46,7 +46,9 @@ class TestParser(TestCase):
 
     def create_test_parser(self):								# simulates the parser that is created within the main script with a bunch of generic arguments
         import argparse
-        parser = argparse.ArgumentParser(description='simulates passing arguments to script')	
+        parser = argparse.ArgumentParser(description='simulates passing arguments to script')
+        parser.add_argument('--argument_1', dest='batcher_argument_1', type=int, help="1st argument") # in real case, args would be already there in the sys.argv
+        parser.add_argument('--argument_2', dest='batcher_argument_2', type=int, help="2nd argument")	
         return parser
 
     def test_new_Parse_arguments(self):
