@@ -62,7 +62,6 @@ def get_batcher_args(options):
     Gets arguments parsed by parse_arguments to be passed as  a dictionary of keywords (**kw) to run_in_batches
     e.g. run_in_batches(iterable, end_batch, **get_batcher_args(options))
     """ 
-    kw = dict()
     kw = vars(options)
     return kw										# dictionary of **kw for batcher, e.g. {'argument_1':10, 'argument_2':20}
 
