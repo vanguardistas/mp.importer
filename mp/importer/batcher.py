@@ -34,16 +34,29 @@ def run_in_batches(iterable, end_batch_callback=None, batch_size=2, batch_start=
 
 def parse_arguments(args=None):		 						# receives a list of all the arguments and create a parser with only batcher args	
     """ Parse arguments from user									 
-
-    This function parses user input and returns the object args that contains arguments
-    """
+#
+#    This function parses user input and returns the object args that contains arguments
+#    """
     import argparse
-    parser = argparse.ArgumentParser(description='Pass arguments to batcher')				
+    parser = argparse.ArgumentParser(description='Pass arguments to batcher')	
     parser.add_argument('--argument_1', dest='batcher_argument_1', type=int, help="1st argument")
     parser.add_argument('--argument_2', dest='batcher_argument_2', type=int, help="2nd argument")
     options = None
     if args is not None: 
-        options = parser.parse_args(args)						# need to skip the first argument (script name) if this function receives full args (args[:1])
+        options = parser.parse_args(args)						# skip the args that are not for batcher
+    return options			 
+
+def new_parse_arguments(parser, args):		 						# receives a PARSER from the main script and a list of args - TODO should not take arguments list
+    """ Parse arguments from user									 
+
+    This function gets the parser containing user inputs and returns the namespace with the batcher options
+    """
+    import argparse
+    parser.add_argument('--argument_1', dest='batcher_argument_1', type=int, help="1st argument")
+    parser.add_argument('--argument_2', dest='batcher_argument_2', type=int, help="2nd argument")	# reads all arguments passed to the script
+    options = None
+    if parser is not None: 
+        options, unknown = parser.parse_known_args(args)						# takes only known args, others go to "unknown" list
     return options			 
 
 def get_batcher_args(options):									
@@ -53,11 +66,8 @@ def get_batcher_args(options):
     e.g. run_in_batches(iterable, end_batch, **get_batcher_args(options))
     """ 
     kw = dict()
-    if options.batcher_argument_1:								# options object result of parse_args
-        kw['batcher_argument_1'] = options.batcher_argument_1
-    if options.batcher_argument_2:
-        kw['batcher_argument_2'] = options.batcher_argument_2
-    return kw										# dictionary of **wk for batcher, e.g. {'argument_1':10, 'argument_2':20}
+    kw = vars(options)
+    return kw										# dictionary of **kw for batcher, e.g. {'argument_1':10, 'argument_2':20}
 
 
 

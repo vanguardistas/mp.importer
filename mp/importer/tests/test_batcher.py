@@ -42,33 +42,33 @@ class TestBatcher(TestCase):
         result = self.one('abc', batch_size=2, max_batches=2)
         self.assertEqual(result, 'abXcX')
 
+class TestParser(TestCase):
 
-    def test_Parse_arguments(self):
+    def create_test_parser(self):								# simulates the parser that is created within the main script with a bunch of generic arguments
+        import argparse
+        parser = argparse.ArgumentParser(description='simulates passing arguments to script')	
+        return parser
+
+    def test_new_Parse_arguments(self):
         from .. import batcher
         args =  ["--argument_1", "10", "--argument_2", "2"] 					# sys.argv returns a list like this, this function can take CL inputs					
-        options = batcher.parse_arguments(args)
+        parser = self.create_test_parser()
+        options = batcher.new_parse_arguments(parser, args)
         result = []  										# option is Namespace(argument_1=10),
         result.append(options.batcher_argument_1)
         result.append(options.batcher_argument_2)
         self.assertEqual(result, [10, 2])
 
-
     def test_Get_batcher_args(self):
         from .. import batcher
-        args = ["--argument_1", "10", "--argument_2", "2"]									
-        options = batcher.parse_arguments(args)
+        args = ["--argument_1", "10", "--argument_2", "2"]
+        parser = self.create_test_parser()									
+        options = batcher.new_parse_arguments(parser, args)
         result = batcher.get_batcher_args(options)						# options is a namespace returned by argparse, batcher_args is a dictionary **kw
         self.assertEqual(result, {'batcher_argument_1':10 , 'batcher_argument_2':2})
- 
-    # TODO make it work directly with output of sys.argv, need to know the script arguments and order - generalize!?
-    def test_Get_batcher_args_allstring(self):
-        from .. import batcher
-        args = ['./bin/import_from_godengo_batcher.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--argument_1', '10', '--argument_2', '2']				
-        newargs = args[5:]
-        print (newargs)
-        options = batcher.parse_arguments(newargs)
-        result = batcher.get_batcher_args(options)						# options is a namespace returned by argparse, batcher_args is a dictionary **kw
-        self.assertEqual(result, {'batcher_argument_1':10 , 'batcher_argument_2':2}) 
+
+
+
 
 
 
