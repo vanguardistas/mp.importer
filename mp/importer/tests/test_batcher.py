@@ -42,59 +42,69 @@ class TestBatcher(TestCase):
         result = self.one('abc', batch_size=2, max_batches=2)
         self.assertEqual(result, 'abXcX')
 
+
 class TestParser(TestCase):
 
-    def create_test_parser(self):								# simulates the parser that is created within the main script with a bunch of generic arguments
+    def create_test_parser(self):								# simulates the parser within the main script
         import argparse
         parser = argparse.ArgumentParser(description='simulates passing arguments to script')
-        parser.add_argument('--db', dest='to_db', help="destination database")			# the main function adds the general arguments	
-        parser.add_argument('--from-db', dest='from_db', help="source database")			
+        parser.add_argument('--db', dest='to_db', help="destination database")			# the main script adds all general arguments (9 more)	
+        parser.add_argument('--from-db', dest='from_db', help="source database")		
         return parser
+	
 
-
-    def test_new_Parse_arguments(self):
+    def test_Parse_arguments(self):
         from .. import batcher
         parser = self.create_test_parser()
-        parser = batcher.new_parse_arguments(parser)						# adds batcher arguments to parser
-        args = ['./bin/import_from_godengo_batcher.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--argument_1', '10', '--argument_2', '2']
+        parser = batcher.parse_arguments(parser)						
+        args = ['./bin/import_from_godengo_batcher.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--batch-size', '10', '--max-batches', '2']
         options = parser.parse_args(args[1:])							# parsing done in the main function and for all arguments except program name
         result = []  										
-        result.append(options.batcher_argument_1)
-        result.append(options.batcher_argument_2)
+        result.append(options.batch_size)
+        result.append(options.max_batches)
         self.assertEqual(result, [10, 2])
 
 
     def test_Get_batcher_args_alline(self):
         from .. import batcher
-        args = ['./bin/import_from_godengo_batcher.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--argument_1', '10', '--argument_2', '2']
+        args = ['./bin/import_from_godengo_batcher.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--batch-size', '10', '--max-batches', '2']
         parser = self.create_test_parser()									
-        parser = batcher.new_parse_arguments(parser)
+        parser = batcher.parse_arguments(parser)
         options = parser.parse_args(args[1:])													 
         result = batcher.get_batcher_args(options)						
-        self.assertEqual(result, {'batcher_argument_1':10 , 'batcher_argument_2':2})
+        self.assertEqual(result, {'batch_size':10 , 'max_batches':2})
 
 
     def test_Get_batcher_args_none(self):
         from .. import batcher
         args = []
         parser = self.create_test_parser()									
-        parser = batcher.new_parse_arguments(parser)
+        parser = batcher.parse_arguments(parser)
         options = parser.parse_args(args[1:])													 
-        result = batcher.get_batcher_args(options)		# if input is not specified, do not get the argument				
-        self.assertEqual(result, {}) 				# not like {'batcher_argument_1': None} because disables default for missing arguments
+        result = batcher.get_batcher_args(options)						# if input is not specified, batcher gives default values				
+        self.assertEqual(result, {}) 				
 
 
     def test_Get_batcher_args_missing_arg(self):
         from .. import batcher
-        args = ['./bin/import_from_godengo_batcher.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--argument_1', '10']
+        args = ['./bin/import_from_godengo_batcher.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--batch-size', '10']
         parser = self.create_test_parser()									
-        parser = batcher.new_parse_arguments(parser)
+        parser = batcher.parse_arguments(parser)
         options = parser.parse_args(args[1:])													 
         result = batcher.get_batcher_args(options)						
-        self.assertEqual(result, {'batcher_argument_1': 10}) 	
+        self.assertEqual(result, {'batch_size': 10}) 	
 
-class TestAll(TestCase):
-# To try the whole workflow, using two functions (temporary)
+    def test_Get_batcher_args_less_args(self):
+        from .. import batcher
+        args = ['./bin/import_from_godengo_batcher.py', '--db', 'test_batcher', '--batch-size', '10']
+        parser = self.create_test_parser()									
+        parser = batcher.parse_arguments(parser)
+        options = parser.parse_args(args[1:])													 
+        result = batcher.get_batcher_args(options)						
+        self.assertEqual(result, {'batch_size': 10}) 
+
+
+class TestAll(TestCase):									# To test the whole workflow, similarly to real case
 
     def create_test_parser(self):								
         import argparse
@@ -105,12 +115,11 @@ class TestAll(TestCase):
 
     def test_all(self):
         from .. import batcher
-        args = ['./bin/import_from_godengo_batcher.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--batch-size', '3', '--max-batches', '1']
+        args = ['./bin/import_from_godengo_batcher.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--batch-start', '1', '--max-batches', '1']
         parser = self.create_test_parser()							
-        parser = batcher.Script_parse_arguments(parser)
+        parser = batcher.parse_arguments(parser)
         options = parser.parse_args(args[1:])													 
-        kw = batcher.Script_get_batcher_args(options)		# gives the default value to missing arguments
-        print ("kw", kw)
+        kw = batcher.get_batcher_args(options)		
         log = []
         def end_batch():                
             log.append('X')
@@ -118,7 +127,7 @@ class TestAll(TestCase):
         for letter in batcher:
             log.append(letter)
         result = ''.join(log)
-        self.assertEqual(result, 'abcX')								
+        self.assertEqual(result, 'cdX')								
 	
 
 

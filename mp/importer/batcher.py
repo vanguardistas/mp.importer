@@ -14,7 +14,6 @@ def run_in_batches(iterable, end_batch_callback=None, batch_size=2, batch_start=
     """ 	
     c = 0
     ended = False
-    print ('parser arguments:', batch_size, batch_start, max_batches)
     for k in iterable:
         c = c + 1			
         current_batch, position_in_batch = divmod(c, batch_size)
@@ -32,17 +31,17 @@ def run_in_batches(iterable, end_batch_callback=None, batch_size=2, batch_start=
         end_batch_callback()	
 
 
-def new_parse_arguments(parser):		 						
+def parse_arguments(parser):		 						
     """ Adds batcher arguments to the parser									 
 
     This function gets the parser containing user inputs
     It adds arguments and returns a parser
     The parsing of args is performed in the main script 
     """ 
-    parser.add_argument('--argument_1', dest='batcher_argument_1', type=int, help="1st argument")
-    parser.add_argument('--argument_2', dest='batcher_argument_2', type=int, help="2nd argument")
+    parser.add_argument('--batch-size', dest='batch_size', action='store', type=int, help="Number of elements in each batch")			# set default values here? now in batcher		
+    parser.add_argument('--batch-start', dest='batch_start', action='store', type=int, help="starts importing batches from a given batch")
+    parser.add_argument('--max-batches', dest='max_batches', action='store', type=int, help="Maximum amount of batches imported")
     return parser		 
-
 
 
 def get_batcher_args(options):									
@@ -54,45 +53,14 @@ def get_batcher_args(options):
     e.g. run_in_batches(iterable, end_batch, **get_batcher_args(options))
     """ 
     kw_temp = vars(options)
-    kw = dict()										# so dictionary does not change size (error in python 3.4)	
-    for i, j in kw_temp.items():							# filter dictionary to keep only batcher parameters 
-        if i in ('batcher_argument_2', 'batcher_argument_1'):
-            if j is not None:
-                kw.update({i:j})
-    return kw										
-
-
-#---------------------------------------------------------
-# Functions to try the whole workflow - temporary
-
-def Script_parse_arguments(parser):		 						
-    """ Adds batcher arguments to the parser									 
-
-    This function gets the parser containing user inputs
-    It adds arguments and returns a parser
-    The parsing of args is performed in the main script 
-    """ 
-    parser.add_argument('--batch-size', dest='batch_size', type=int, help="1st argument")
-    parser.add_argument('--batch-start', dest='batch_start', type=int, help="2nd argument")
-    parser.add_argument('--max-batches', dest='max_batches', type=int, help="3rd argument")
-    return parser		 
-
-
-def Script_get_batcher_args(options):									
-    """ Takes namespace and filters batcher arguments
-
-    Gets namespace with arguments parsed by parse_arguments 
-    Filters only the batcher arguments 
-    Stores arguments in a dictionary of keywords (**kw) for "run_in_batches"
-    e.g. run_in_batches(iterable, end_batch, **get_batcher_args(options))
-    """ 
-    kw_temp = vars(options)
-    kw = dict()										# so dictionary does not change size (error in python 3.4)	
-    for i, j in kw_temp.items():							# filter dictionary to keep only batcher parameters 
+    kw = dict()											
+    for i, j in kw_temp.items():							 
         if i in ('batch_size', 'batch_start', 'max_batches'):
             if j is not None:
                 kw.update({i:j})
     return kw										
+
+									
 
 
 
