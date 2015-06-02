@@ -5,7 +5,6 @@ This module contains utilities for creating batches of elements from an iterable
 The user can select the batch size, the maximum number of batches and the starting batch for yielding elements
 Other function will be added to randomly sample elements and to retrieve the last batch  
 """
-
 def run_in_batches(iterable, end_batch_callback=None, batch_size=2, batch_start=0, max_batches=None):	
     """ Create batches from an iterable
    
@@ -26,9 +25,44 @@ def run_in_batches(iterable, end_batch_callback=None, batch_size=2, batch_start=
             if position_in_batch == 0: 							# ends completed batches
                 end_batch_callback()
                 ended = True
-        if max_batches is not None and current_batch == batch_start + max_batches:					# if gets maximum allowed batches, break 
+        if max_batches is not None and current_batch == batch_start + max_batches:	# if gets maximum allowed batches, break 
             break
     if ended is False:
         end_batch_callback()	
+
+
+def add_arguments(parser):		 						
+    """ Adds batcher arguments to the parser									 
+
+    This function gets the parser containing user inputs
+    It adds arguments and returns a parser
+    The parsing of args is performed in the main script 
+    """ 
+    parser.add_argument('--batch-size', dest='batch_size', action='store', default=1000, 
+                       type=int, help="Number of elements in each batch")					
+    parser.add_argument('--batch-start', dest='batch_start', action='store', default=0, 
+                       type=int, help="starts importing batches from a given batch")
+    parser.add_argument('--max-batches', dest='max_batches', action='store', default=None, 
+                       type=int, help="Maximum amount of batches imported")
+
+
+def get_batcher_args(options):									
+    """ Takes namespace and filters batcher arguments
+
+    Gets namespace with arguments parsed by parse_arguments 
+    Filters only the batcher arguments 
+    Stores arguments in a dictionary of keywords (**kw) for "run_in_batches"
+    e.g. run_in_batches(iterable, end_batch, **get_batcher_args(options))
+    """ 
+    kw_temp = vars(options)
+    kw = dict()											
+    for i, j in kw_temp.items():							 
+        if i not in ('batch_size', 'batch_start', 'max_batches'):
+            continue        
+        kw[i] = j
+    return kw									
+
+
+
 
 
