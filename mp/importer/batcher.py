@@ -31,7 +31,7 @@ def run_in_batches(iterable, end_batch_callback=None, batch_size=2, batch_start=
         end_batch_callback()	
 
 
-def parse_arguments(parser):		 						
+def add_arguments(parser):		 						
     """ Adds batcher arguments to the parser									 
 
     This function gets the parser containing user inputs
@@ -41,7 +41,6 @@ def parse_arguments(parser):
     parser.add_argument('--batch-size', dest='batch_size', action='store', type=int, help="Number of elements in each batch")			# set default values here? now in batcher		
     parser.add_argument('--batch-start', dest='batch_start', action='store', type=int, help="starts importing batches from a given batch")
     parser.add_argument('--max-batches', dest='max_batches', action='store', type=int, help="Maximum amount of batches imported")
-    return parser		 
 
 
 def get_batcher_args(options):									

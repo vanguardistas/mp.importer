@@ -53,10 +53,10 @@ class TestParser(TestCase):
         return parser
 	
 
-    def test_Parse_arguments(self):
+    def test_Add_arguments(self):
         from .. import batcher
         parser = self.create_test_parser()
-        parser = batcher.parse_arguments(parser)						
+        batcher.add_arguments(parser)					
         args = ['./bin/import_from_godengo_batcher.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--batch-size', '10', '--max-batches', '2']
         options = parser.parse_args(args[1:])							# parsing done in the main function and for all arguments except program name
         result = []  										
@@ -68,8 +68,8 @@ class TestParser(TestCase):
     def test_Get_batcher_args_alline(self):
         from .. import batcher
         args = ['./bin/import_from_godengo_batcher.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--batch-size', '10', '--max-batches', '2']
-        parser = self.create_test_parser()									
-        parser = batcher.parse_arguments(parser)
+        parser = self.create_test_parser()		
+        batcher.add_arguments(parser)
         options = parser.parse_args(args[1:])													 
         result = batcher.get_batcher_args(options)						
         self.assertEqual(result, {'batch_size':10 , 'max_batches':2})
@@ -79,7 +79,7 @@ class TestParser(TestCase):
         from .. import batcher
         args = []
         parser = self.create_test_parser()									
-        parser = batcher.parse_arguments(parser)
+        batcher.add_arguments(parser)
         options = parser.parse_args(args[1:])													 
         result = batcher.get_batcher_args(options)						# if input is not specified, batcher gives default values				
         self.assertEqual(result, {}) 				
@@ -89,7 +89,7 @@ class TestParser(TestCase):
         from .. import batcher
         args = ['./bin/import_from_godengo_batcher.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--batch-size', '10']
         parser = self.create_test_parser()									
-        parser = batcher.parse_arguments(parser)
+        batcher.add_arguments(parser)
         options = parser.parse_args(args[1:])													 
         result = batcher.get_batcher_args(options)						
         self.assertEqual(result, {'batch_size': 10}) 	
@@ -98,7 +98,7 @@ class TestParser(TestCase):
         from .. import batcher
         args = ['./bin/import_from_godengo_batcher.py', '--db', 'test_batcher', '--batch-size', '10']
         parser = self.create_test_parser()									
-        parser = batcher.parse_arguments(parser)
+        batcher.add_arguments(parser)
         options = parser.parse_args(args[1:])													 
         result = batcher.get_batcher_args(options)						
         self.assertEqual(result, {'batch_size': 10}) 
@@ -117,7 +117,7 @@ class TestAll(TestCase):									# To test the whole workflow, similarly to real
         from .. import batcher
         args = ['./bin/import_from_godengo_batcher.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--batch-start', '1', '--max-batches', '1']
         parser = self.create_test_parser()							
-        parser = batcher.parse_arguments(parser)
+        batcher.add_arguments(parser)
         options = parser.parse_args(args[1:])													 
         kw = batcher.get_batcher_args(options)		
         log = []
