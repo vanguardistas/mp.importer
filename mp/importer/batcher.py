@@ -38,9 +38,12 @@ def add_arguments(parser):
     It adds arguments and returns a parser
     The parsing of args is performed in the main script 
     """ 
-    parser.add_argument('--batch-size', dest='batch_size', action='store', type=int, help="Number of elements in each batch")			# set default values here? now in batcher		
-    parser.add_argument('--batch-start', dest='batch_start', action='store', type=int, help="starts importing batches from a given batch")
-    parser.add_argument('--max-batches', dest='max_batches', action='store', type=int, help="Maximum amount of batches imported")
+    parser.add_argument('--batch-size', dest='batch_size', action='store', default=1000, 
+                       type=int, help="Number of elements in each batch")					
+    parser.add_argument('--batch-start', dest='batch_start', action='store', default=0, 
+                       type=int, help="starts importing batches from a given batch")
+    parser.add_argument('--max-batches', dest='max_batches', action='store', default=None, 
+                       type=int, help="Maximum amount of batches imported")
 
 
 def get_batcher_args(options):									
@@ -54,12 +57,12 @@ def get_batcher_args(options):
     kw_temp = vars(options)
     kw = dict()											
     for i, j in kw_temp.items():							 
-        if i in ('batch_size', 'batch_start', 'max_batches'):
-            if j is not None:
-                kw.update({i:j})
-    return kw										
+        if i not in ('batch_size', 'batch_start', 'max_batches'):
+            continue        
+        kw[i] = j
+    return kw									
 
-									
+
 
 
 
