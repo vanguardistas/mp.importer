@@ -188,14 +188,12 @@ class FunctionalTest2(TestCase):								# To test the whole workflow, similarly 
         batcher.add_arguments(parser)
         batcher.add_random_arguments(parser)
         options = parser.parse_args(args[1:])	
- 	# random
         ll = batcher.get_random_args(options)
         source = batcher.random_sampler_2('abcdefghil', **ll)
         temp=[]
         for s in source:              
             temp.append(s)
         temp_source = ''.join(temp)	
-        # batcher									 
         kw = batcher.get_batcher_args(options)		
         log = []
         def end_batch():                

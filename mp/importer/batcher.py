@@ -84,7 +84,7 @@ def random_sampler_2(iterable, seed=None, percentage=10):				# default values
             break
 
 
-# TODO: both options require len(iterable)
+# TODO: both options require len(iterable), try to circumvent this?
 
 
 
