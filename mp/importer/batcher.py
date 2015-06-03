@@ -64,7 +64,7 @@ def get_batcher_args(options):
 
 
 	
-def random_sampler_2(iterable, sys_seed, percentage=10):			# TODO set default 10 and pass *kw									
+def random_sampler_2(iterable, seed=None, percentage=10):			# TODO set default 10 and pass *kw									
     """ allows creating batches with random elements
 
     Gets a percentage of the total data (default 10%)
@@ -74,7 +74,7 @@ def random_sampler_2(iterable, sys_seed, percentage=10):			# TODO set default 10
     import random
     c = 0
     number = (percentage*len(iterable))/100				# number of elements to be yielded
-    random.seed(sys_seed)						# use the seed that has been passed to initialize the random generator
+    random.seed(seed)						# use the seed that has been passed to initialize the random generator
     for k in iterable:
         myvalue = random.random()
         myvalue = int(myvalue * len(iterable))				# refer random number to range 0-len(list), gives a position in iterable for yielding value

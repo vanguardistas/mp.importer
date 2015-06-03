@@ -128,10 +128,12 @@ class TestRandom(TestCase):
     def test_random_sampler_percentage(self):
         from .. import batcher
         source = 'abcdefghil'						
-        seed = self.create_test_seed()				         
-        #print ("the seed to obtain these batches is", seed)		# TODO log seed value somewhere
         percentage = 50
-        result = batcher.random_sampler_2(source, seed, percentage)	# generator that yields the values
+        kw = dict()
+        kw['seed'] = self.create_test_seed()				         
+        #print ("the seed to obtain these batches is", seed)		# TODO log seed value somewhere
+        kw['percentage'] = 50
+        result = batcher.random_sampler_2(source, **kw) 		#seed, percentage)	# generator that yields the values
         log=[]
         for element in result:              
             log.append(element)
@@ -141,9 +143,10 @@ class TestRandom(TestCase):
     def test_random_sampler_elements(self):
         from .. import batcher
         source = 'abcdefghil'						
-        seed = 1				         
-        percentage = 50
-        result = batcher.random_sampler_2(source, seed, percentage)	
+        kw = dict()
+        kw['seed'] = 1
+        kw['percentage'] = 50
+        result = batcher.random_sampler_2(source, **kw)			 #seed, percentage)	
         log=[]
         for element in result:              
             log.append(element)
@@ -151,9 +154,8 @@ class TestRandom(TestCase):
         self.assertEqual(log_list, 'bihce')				# check the elements (knowing the seed, gives always the same result)
 
 
-
-
+	
 # for the test, I pass seed value (so I know the result) but in the reality, seed is generated within the script
 # TODO should I use argument parser here and pass more arguments if random!? 
-
+# create functional random test to use also the random and pass arguments
 
