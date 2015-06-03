@@ -169,5 +169,41 @@ class TestRandom(TestCase):
 	
 # for the test, I pass seed value (so I know the result) but in the reality, seed is generated within the script
 # TODO should I use argument parser here and pass more arguments if random!? 
-# create functional random test to use also the random and pass arguments
+
+
+
+class FunctionalTest2(TestCase):								# To test the whole workflow, similarly to real case
+
+    def create_test_parser_2(self):								
+        import argparse
+        parser = argparse.ArgumentParser(description='simulates passing arguments to script')
+        parser.add_argument('--db', dest='to_db', help="destination database")			
+        parser.add_argument('--from-db', dest='from_db', help="source database")		
+        return parser
+
+    def test_all_2(self):
+        from .. import batcher
+        args = ['./bin/import_script.py', '--db', 'test_batcher', '--from-db', 'postgresql:///database', '--batch-size', '3', '--random', '50', '--seed', '1']
+        parser = self.create_test_parser_2()							
+        batcher.add_arguments(parser)
+        batcher.add_random_arguments(parser)
+        options = parser.parse_args(args[1:])	
+ 	# random
+        ll = batcher.get_random_args(options)
+        source = batcher.random_sampler_2('abcdefghil', **ll)
+        temp=[]
+        for s in source:              
+            temp.append(s)
+        temp_source = ''.join(temp)	
+        # batcher									 
+        kw = batcher.get_batcher_args(options)		
+        log = []
+        def end_batch():                
+            log.append('X')
+        batcher = batcher.run_in_batches(temp_source, end_batch, **kw)
+        for letter in batcher:
+            log.append(letter)
+        result = ''.join(log)
+        self.assertEqual(result, 'bihXceX')								
+	
 

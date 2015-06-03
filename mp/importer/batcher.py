@@ -62,7 +62,6 @@ def get_batcher_args(options):
         kw[i] = j
     return kw									
 
-
 	
 def random_sampler_2(iterable, seed=None, percentage=10):				# default values									
     """ allows creating batches with random elements
@@ -74,7 +73,7 @@ def random_sampler_2(iterable, seed=None, percentage=10):				# default values
     import random
     c = 0
     number = (percentage*len(iterable))/100						# number of elements to be yielded
-    random.seed(seed)									# use the seed
+    random.seed(seed)									# use the seed (if seed is none, uses system generator)
     for k in iterable:
         myvalue = random.random()
         myvalue = int(myvalue * len(iterable))						# random number in interval 0-len(list) gives a position in the iterable 
@@ -89,6 +88,35 @@ def random_sampler_2(iterable, seed=None, percentage=10):				# default values
 
 
 
+# temporary for functional test:
+def add_random_arguments(parser):		 						
+    """ Adds batcher arguments to the parser									 
+
+    This function gets the parser containing user inputs
+    It adds arguments and returns a parser
+    The parsing of args is performed in the main script 
+    """ 
+    parser.add_argument('--random', dest='percentage', action='store', default=10, 
+                       type=int, help="Percentage of elements to be randomly sampled")	
+    parser.add_argument('--seed', dest='seed', action='store', default=None, 
+                       type=int, help="Seed to reproduce last imported batch")				
+
+
+def get_random_args(options):									
+    """ Takes namespace and filters batcher arguments
+
+    Gets namespace with arguments parsed by parse_arguments 
+    Filters only the batcher arguments 
+    Stores arguments in a dictionary of keywords (**kw) for "run_in_batches"
+    e.g. run_in_batches(iterable, end_batch, **get_batcher_args(options))
+    """ 
+    kw_temp = vars(options)
+    kw = dict()											
+    for i, j in kw_temp.items():							 
+        if i not in ('percentage', 'seed'):
+            continue        
+        kw[i] = j
+    return kw	
 
 
 
