@@ -7,10 +7,6 @@ Other function will be added to randomly sample elements and to retrieve the las
 """
 import random
 import logging
-import sys
-_PY2 = sys.version_info[0] == 2 
-if _PY2: 
-    range = xrange
 
 
 def run_in_batches(iterable, end_batch_callback=None, batch_size=2, batch_start=0, max_batches=None, seed=None, percentage=None):	
@@ -28,14 +24,16 @@ def run_in_batches(iterable, end_batch_callback=None, batch_size=2, batch_start=
     """ 	
     c = 0
     ended = False
-    if percentage is not None:									
+    if percentage is not None:
+        mask = set([])										# create the mask without using random.sample
         random.seed(seed)									# seed can be passed as kw to be repeatable
         logging.info('SEED FOR THIS IMPORT: {}'.format(seed))    				# the function logs the seed value (if none, is generated here)				
-        number = int(((100-percentage)*batch_size)/100)						# e.g. to yield the 30% of batch, i mask the 70% of values
-        mask = set(random.sample(range(batch_size), number))					 
-        if 0 in mask:
-            mask.discard(0)
-            mask.add(int(random.random()*10))
+
+        while len(mask) < int(((100-percentage)*batch_size)/100):
+            i = int(random.random() * 10)							# *1000 perche bathc sono da 1000?
+            if i == 0 or i in mask:
+                continue
+            mask.add(i)
     else:
         mask = None										
     for k in iterable:
@@ -54,7 +52,7 @@ def run_in_batches(iterable, end_batch_callback=None, batch_size=2, batch_start=
         if max_batches is not None and current_batch == batch_start + max_batches:		# if gets maximum allowed batches, break 
             break
     if ended is False:
-        end_batch_callback()	
+        end_batch_callback()
 
 
 def add_arguments(parser):		 						
@@ -71,10 +69,9 @@ def add_arguments(parser):
     parser.add_argument('--max-batches', dest='max_batches', action='store', default=None, 
                        type=int, help="Maximum amount of batches imported")
     parser.add_argument('--percentage', dest='percentage', action='store', default=None,	
-                       type=int, help="Percentage of elements to be randomly sampled")	
+                       type=int, help="Percentage of elements to be randomly sampled (0-100%)")	
     parser.add_argument('--seed', dest='seed', action='store', default=None, 
                        type=int, help="Seed to reproduce last imported batch")	
-
 
 
 def get_batcher_args(options):									

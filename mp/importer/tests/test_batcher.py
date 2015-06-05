@@ -5,10 +5,6 @@ from collections import namedtuple
 from collections import Iterable
 from itertools import *
 
-import sys
-_PY2 = sys.version_info[0] == 2 
-if _PY2: 
-    range = xrange
 
 class TestBatcher(TestCase):
 
@@ -95,6 +91,101 @@ class TestParser(TestCase):
         self.assertEqual(result, { 'batch_start': 0, 'batch_size': 10, 'percentage': 50}) 	
 
 
+class TestRandom(TestCase):
+ 
+    def create_test_parser(self):								
+        import argparse
+        parser = argparse.ArgumentParser(description='simulates passing arguments to script')
+        parser.add_argument('--db', dest='to_db', help="destination database")			
+        parser.add_argument('--from-db', dest='from_db', help="source database")			
+        return parser
+
+
+    def test_random_sampler_percentage(self):
+        from .. import batcher
+        args = ['./bin/import_script.py', '--db', 'test_batcher', '--from-db', 'database', '--batch-size', '10', '--percentage', '50']	
+        parser = self.create_test_parser()							
+        batcher.add_arguments(parser)	
+        options = parser.parse_args(args[1:])													 			
+        kw =  batcher.get_batcher_args(options)		
+        log=[]
+        def end_batch():  
+            log.append('X')
+        result = batcher.run_in_batches('abcdefghil', end_batch, **kw) 	
+        for element in result:              
+            log.append(element)
+        log_list = ''.join(log)
+        self.assertEqual(len(log_list), 6) 							# check that it's yielding the right number of elements (5) + the 'X'
+
+
+    def test_random_sampler_percentage_2(self):
+        from .. import batcher
+        args = ['./bin/import_script.py', '--db', 'test_batcher', '--from-db', 'database', '--batch-size', '10', '--percentage', '50', '--seed', '1']	
+        parser = self.create_test_parser()							
+        batcher.add_arguments(parser)	
+        options = parser.parse_args(args[1:])													 			
+        kw =  batcher.get_batcher_args(options)		
+        log=[]
+        def end_batch():  
+            log.append('X')
+        result = batcher.run_in_batches('abcdefghilmnopqrstuvwxyz', end_batch, **kw) 						
+        for element in result:              
+            log.append(element)
+        log_list = ''.join(log)
+        self.assertEqual(len(log_list), 14)							# some batches of 5 + the 'X' + incomplete batch (which may have 2 or 3 elements depending)
+
+
+    def test_random_sampler_elements(self):
+        from .. import batcher
+        args = ['./bin/import_script.py', '--db', 'test_batcher', '--from-db', 'database', '--batch-size', '10',  '--percentage', '50', '--seed', '1']
+        parser = self.create_test_parser()							
+        batcher.add_arguments(parser)		
+        options = parser.parse_args(args[1:])													 			
+        kw =  batcher.get_batcher_args(options)	
+        log=[]
+        def end_batch():  
+            log.append('X')
+        result = batcher.run_in_batches('abcdefghil', end_batch, **kw)			 	
+        for element in result:              
+            log.append(element)
+        log_list = ''.join(log)
+        self.assertEqual(log_list, 'cefilX')							# check the elements (knowing the seed, gives always the same result)
+
+
+    def test_random_sampler_incomplete_2(self):
+        from .. import batcher 
+        args = ['./bin/import_script.py', '--db', 'test_batcher', '--from-db', 'database', '--batch-size', '10',  '--percentage', '50', '--seed', '1']
+        parser = self.create_test_parser()							
+        batcher.add_arguments(parser)		
+        options = parser.parse_args(args[1:])													 			
+        kw =  batcher.get_batcher_args(options)	
+        log=[]
+        def end_batch():  
+            log.append('X')
+        result = batcher.run_in_batches('abcdefghilmnopqrstuvwxyz', end_batch, **kw)			 	
+        for element in result:              
+            log.append(element)
+        log_list = ''.join(log)
+        self.assertEqual(log_list, 'cefilXoqruvXyX')						# it creates batches of 5 elements (i.e. 50%(10)) and works for incomplete batches
+
+
+    def test_random_sampler_arguments(self):
+        from .. import batcher
+        args = ['./bin/import_script.py', '--db', 'test_batcher', '--from-db', 'database', '--batch-size', '10', '--batch-start', '1', '--max-batches', '1', '--percentage', '50', '--seed', '1']
+        parser = self.create_test_parser()							
+        batcher.add_arguments(parser)		
+        options = parser.parse_args(args[1:])													 			
+        kw =  batcher.get_batcher_args(options)	
+        log=[]
+        def end_batch():  
+            log.append('X')
+        result = batcher.run_in_batches('abcdefghilmnopqrstuvwxyz', end_batch, **kw)			 	
+        for element in result:              
+            log.append(element)
+        log_list = ''.join(log)
+        self.assertEqual(log_list, 'oqruvX')							# test other batch parameters  
+
+
 class FunctionalTest(TestCase):									# To test the whole workflow, similarly to real case
 
     def create_test_parser(self):								
@@ -120,120 +211,19 @@ class FunctionalTest(TestCase):									# To test the whole workflow, similarly 
         result = ''.join(log)
         self.assertEqual(result, 'defXgX')								
 	
-
-class TestRandom(TestCase):
- 
-    def create_test_parser(self):								
-        import argparse
-        parser = argparse.ArgumentParser(description='simulates passing arguments to script')
-        parser.add_argument('--db', dest='to_db', help="destination database")			
-        parser.add_argument('--from-db', dest='from_db', help="source database")			
-        return parser
-
-    def test_random_sampler_percentage(self):
+    def test_all_random(self):
         from .. import batcher
-        args = ['./bin/import_script.py', '--db', 'test_batcher', '--from-db', 'database', '--batch-size', '10', '--percentage', '50']	
+        args = ['./bin/import_script.py', '--db', 'test_batcher', '--from-db', 'database', '--batch-size', '9', '--percentage', '30', '--seed', '1']
         parser = self.create_test_parser()							
-        batcher.add_arguments(parser)	
-        options = parser.parse_args(args[1:])													 			
-        kw =  batcher.get_batcher_args(options)		
-        log=[]
-        def end_batch():  
+        batcher.add_arguments(parser)
+        options = parser.parse_args(args[1:])													 
+        kw = batcher.get_batcher_args(options)		
+        log = []
+        def end_batch():                
             log.append('X')
-        result = batcher.run_in_batches('abcdefghil', end_batch, **kw) 	
-        for element in result:              
-            log.append(element)
-        log_list = ''.join(log)
-        self.assertEqual(len(log_list), 6)							# check that it's yielding the right number of elements (5) + the 'X'
-
-
-    def test_random_sampler_percentage_2(self):
-        from .. import batcher
-        import sys
-        _PY2 = sys.version_info[0] == 2 
-        _PY3 = sys.version_info[0] == 3 
-        args = ['./bin/import_script.py', '--db', 'test_batcher', '--from-db', 'database', '--batch-size', '10', '--percentage', '50', '--seed', '1']	
-        parser = self.create_test_parser()							
-        batcher.add_arguments(parser)	
-        options = parser.parse_args(args[1:])													 			
-        kw =  batcher.get_batcher_args(options)		
-        log=[]
-        def end_batch():  
-            log.append('X')
-        result = batcher.run_in_batches('abcdefghilmnopqrstuvwxyz', end_batch, **kw) 						
-        for element in result:              
-            log.append(element)
-        log_list = ''.join(log)
-        if _PY2:
-            self.assertEqual(len(log_list), 15)							# some batches of 5 + the 'X' + incomplete batch (which may have 2 or 3 elements depending)
-        if _PY3:
-            self.assertEqual(len(log_list), 12)							# no incomplete batch because first values of the batch are masked and then iterable ends
-
-    def test_random_sampler_elements(self):
-        from .. import batcher
-        import sys
-        _PY2 = sys.version_info[0] == 2 
-        _PY3 = sys.version_info[0] == 3 
-        args = ['./bin/import_script.py', '--db', 'test_batcher', '--from-db', 'database', '--batch-size', '10',  '--percentage', '50', '--seed', '1']
-        parser = self.create_test_parser()							
-        batcher.add_arguments(parser)		
-        options = parser.parse_args(args[1:])													 			
-        kw =  batcher.get_batcher_args(options)	
-        log=[]
-        def end_batch():  
-            log.append('X')
-        result = batcher.run_in_batches('abcdefghil', end_batch, **kw)			 	
-        for element in result:              
-            log.append(element)
-        log_list = ''.join(log)
-        if _PY2:
-            self.assertEqual(log_list, 'cdehlX')						# check the elements (knowing the seed, gives always the same result)
-        if _PY3:
-            self.assertEqual(log_list, 'efhilX')
-
-    def test_random_sampler_incomplete(self):
-        from .. import batcher
-        import sys
-        _PY2 = sys.version_info[0] == 2 
-        _PY3 = sys.version_info[0] == 3 
-        args = ['./bin/import_script.py', '--db', 'test_batcher', '--from-db', 'database', '--batch-size', '10',  '--percentage', '50', '--seed', '1']
-        parser = self.create_test_parser()							
-        batcher.add_arguments(parser)		
-        options = parser.parse_args(args[1:])													 			
-        kw =  batcher.get_batcher_args(options)	
-        log=[]
-        def end_batch():  
-            log.append('X')
-        result = batcher.run_in_batches('abcdefghilmnopqrstuvwxyz', end_batch, **kw)			 	
-        for element in result:              
-            log.append(element)
-        log_list = ''.join(log)
-        if _PY2:
-            self.assertEqual(log_list, 'cdehlXopqtvXyzX')					# it creates batches of 5 elements (i.e. 50%(10)) and works for incomplete batches  
-        if _PY3:
-            self.assertEqual(log_list, 'efhilXqrtuvX')						# no incomplete batch because first values of the batch are masked and then iterable ends
-
-    def test_random_sampler_arguments(self):
-        from .. import batcher
-        import sys
-        _PY2 = sys.version_info[0] == 2 
-        _PY3 = sys.version_info[0] == 3 
-        args = ['./bin/import_script.py', '--db', 'test_batcher', '--from-db', 'database', '--batch-size', '10', '--batch-start', '1', '--max-batches', '1', '--percentage', '50', '--seed', '1']
-        parser = self.create_test_parser()							
-        batcher.add_arguments(parser)		
-        options = parser.parse_args(args[1:])													 			
-        kw =  batcher.get_batcher_args(options)	
-        log=[]
-        def end_batch():  
-            log.append('X')
-        result = batcher.run_in_batches('abcdefghilmnopqrstuvwxyz', end_batch, **kw)			 	
-        for element in result:              
-            log.append(element)
-        log_list = ''.join(log)
-        if _PY2:
-            self.assertEqual(log_list, 'opqtvX')						# it creates batches of 5 elements (i.e. 50%(10)) and works for incomplete batches  
-        if _PY3:
-            self.assertEqual(log_list, 'qrtuvX')
-
-
-
+        batcher = batcher.run_in_batches('abcdefghilmnopqrstuvwxyz', end_batch, **kw)
+        for letter in batcher:
+            log.append(letter)
+        result = ''.join(log)
+        self.assertEqual(result, 'ceiXnptXwyX')
+  
