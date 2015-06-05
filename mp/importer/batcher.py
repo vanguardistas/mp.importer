@@ -16,7 +16,7 @@ def run_in_batches(iterable, end_batch_callback=None, batch_size=2, batch_start=
     The callback function is called when a) maximum batches are reached or b) iterable is exhausted 
     All batches (complete and incomplete) are ended by a callback function
 
-    If random options are not None, gets a percentage of the total data
+    If random options are not None, gets a percentage of the total data (in range 0-100)
     The percentage value is converted to integer so it's an approximated value
 
     Pseudo-samples randomly the elements in the selected percentage (approximate)
