@@ -5,6 +5,14 @@ This module contains utilities for creating batches of elements from an iterable
 The user can select the batch size, the maximum number of batches and the starting batch for yielding elements
 Other function will be added to randomly sample elements and to retrieve the last batch  
 """
+import random
+import logging
+import sys
+_PY2 = sys.version_info[0] == 2 
+if _PY2: 
+    range = xrange
+
+
 def run_in_batches(iterable, end_batch_callback=None, batch_size=2, batch_start=0, max_batches=None, seed=None, percentage=None):	
     """ Create batches from an iterable
    
@@ -13,35 +21,40 @@ def run_in_batches(iterable, end_batch_callback=None, batch_size=2, batch_start=
     All batches (complete and incomplete) are ended by a callback function
 
     If random options are not None, gets a percentage of the total data
+    The percentage value is converted to integer so it's an approximated value
+
     Pseudo-samples randomly the elements in the selected percentage (approximate)
-    The main script logs the seed to make it repeatable
+    The main script logs the seed to make it repeatable (if seed not passed, uses current system time)
     """ 	
-    import random
     c = 0
     ended = False
     if percentage is not None:									
         random.seed(seed)									# seed can be passed as kw to be repeatable
-        number = int(((100-percentage)*batch_size)/100)						# e.g. to yield the 30% of batch i mask the 70%
-        mask = set(random.sample(range(batch_size), number))										
+        logging.info('SEED FOR THIS IMPORT: {}'.format(seed))    				# the function logs the seed value (if none, is generated here)				
+        number = int(((100-percentage)*batch_size)/100)						# e.g. to yield the 30% of batch, i mask the 70% of values
+        mask = set(random.sample(range(batch_size), number))					 
+        if 0 in mask:
+            mask.discard(0)
+            mask.add(int(random.random()*10))
     else:
-        mask = []
+        mask = None										
     for k in iterable:
         c = c + 1			
         current_batch, position_in_batch = divmod(c, batch_size)
-        if position_in_batch not in mask:							# yield only values that are not in the mask!
-            if position_in_batch == 0:
-                current_batch = current_batch - 1						# last element of a batch has position=0, value=current_batch+1
-            if current_batch >= batch_start and (max_batches is None or current_batch < batch_start + max_batches):
-                ended = False
-                yield k 
-                if position_in_batch == 0: 							# ends completed batches
-                    end_batch_callback()
-                    ended = True
-            if max_batches is not None and current_batch == batch_start + max_batches:		# if gets maximum allowed batches, break 
-                break
+        if mask is not None and position_in_batch in mask:					# yield only values that are not in the mask! 
+            continue
+        if position_in_batch == 0:
+            current_batch = current_batch - 1							# last element of a batch has position=0, value=current_batch+1
+        if current_batch >= batch_start and (max_batches is None or current_batch < batch_start + max_batches):
+            ended = False
+            yield k 
+            if position_in_batch == 0: 								# ends completed batches
+                end_batch_callback()
+                ended = True
+        if max_batches is not None and current_batch == batch_start + max_batches:		# if gets maximum allowed batches, break 
+            break
     if ended is False:
         end_batch_callback()	
-
 
 
 def add_arguments(parser):		 						
@@ -76,22 +89,9 @@ def get_batcher_args(options):
     kw = dict()											
     for i, j in kw_temp.items():							 
         if i not in ('batch_size', 'batch_start', 'max_batches', 'percentage', 'seed'):
+            continue
+        if j is None:
             continue        
-        kw[i] = j
-    return kw									
-
-	
-
-
-
-
-
-
-	
-
-
-
-
-
-
+        kw[i] = j										
+    return kw										
 
