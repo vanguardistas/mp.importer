@@ -1,3 +1,4 @@
+from .schema import get_schema
 from lxml import etree
 
 BLOCK_ELEMENTS = frozenset(['p', 'h4', 'hr', 'pre', 'blockquote', 'ul', 'ol', 'li'])
@@ -166,3 +167,81 @@ def _save_text(parent, previous, text, add_space):
                 parent.text += ' '
             parent.text += text
 
+CLEANERS_CORRECT = ( # cleaners which are jus the right thing to do
+        remove_noop_inline_elements,
+        remove_useless_br)
+
+def slot(context, relevance='inline', display='carousel', idx_node=None):
+    """Return a slot Element and a dictionary representing the slot.
+
+    The dictionary will be appended to the context.slots list.
+
+    if idx_node is not None the slot element will be inserted into the document
+    before it.
+
+    https://api.metropublisher.com/doc/resources/content.html#resource-get-content-slot-get
+    """
+    s = dict(
+            uuid=str(context.uuid('slot')),
+            relevance=relevance,
+            display=display,
+            media=[]
+            )
+    snode = etree.Element('slot')
+    snode.attrib['id'] = str(s['uuid'])
+    context.slots.append(s)
+    if idx_node is not None:
+        parent = idx_node.getparent()
+        idx = parent.index(idx_node)
+        parent.insert(idx, snode)
+    return snode, s
+
+def _to_etree(content):
+    doc = etree.HTML(u'<html><body>{}</body></html>'.format(content))
+    doc = doc.find('body')
+    doc.tag = 'div'
+    return doc
+
+def _inner_to_string(root, pretty_print=False):
+    """Convert the contents of a node to a string"""
+    outstr = [root.text]
+    for element in root.getchildren():
+        outstr.append(etree.tostring(element, encoding='unicode', pretty_print=pretty_print))
+    return u''.join([o for o in outstr if o])
+
+def clean_content(
+        context,
+        content,
+        cleaners=CLEANERS_CORRECT,
+        fallback_cleaners=()):
+    """Clean the content for import to metropublisher.
+
+    Returns a tuple of (content, media_slots) where content is the cleaned
+    content and media_slot is a list of slot objects:
+
+    https://api.metropublisher.com/doc/resources/content.html#resource-get-content-slot-get
+    """
+    assert context.slots is None
+    context = context._replace(slots=[])
+    doc = _to_etree(content)
+    for cleaner in cleaners:
+        cleaner(context, doc)
+    schema = get_schema()
+    is_valid = schema.validate(doc)
+    if not is_valid:
+        # our cleaning failed to produce a valid document.
+        # we thow away the old context and fallback to the
+        # fallback_cleaners and put the result into an
+        # embed media
+        context = context._replace(slots=[])
+        doc = _to_etree(content)
+        for cleaner in fallback_cleaners:
+            cleaner(context, doc)
+        snode, s = slot(context)
+        s['media'].append(dict(
+            type='embed',
+            embed_code=_inner_to_string(doc)))
+        doc = etree.Element('div')
+        doc.append(snode)
+    content = _inner_to_string(doc)
+    return content, context.slots

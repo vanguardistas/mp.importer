@@ -8,6 +8,7 @@ except ImportError:
     from mock import Mock
 
 PY3 = sys.version_info[0] == 3
+PY2 = sys.version_info[0] == 2
 
 class CleanerTest(TestCase):
 
@@ -223,3 +224,41 @@ class Test_drop_node(CleanerTest):
                 '<p>padding is not added if parent has no text or node has no tail</p>',
                 add_padding=True)
 
+class Test_clean_content(TestCase):
+
+    def context(self):
+        from collections import namedtuple, Counter
+        import uuid
+        class Context(namedtuple('Context', 'slots')):
+
+            counter = Counter()
+
+            def uuid(self, type):
+                self.counter[type] += 1
+                ns = 'metropublisher.com/{}/{}'.format(type, self.counter[type])
+                if PY2:
+                    ns = ns.encode('ascii')
+                return uuid.uuid3(uuid.NAMESPACE_DNS, ns)
+
+        return Context(slots=None)
+
+    def one(self, content, context=None, **kw):
+        if context is None:
+            context = self.context()
+        from ..cleaner import clean_content
+        return clean_content(context, content, **kw)
+
+    def test_basic(self):
+        in_content = '<p>Valid</p>'
+        out_content, slots = self.one(in_content)
+        self.assertEqual(in_content, out_content)
+        self.assertEqual(slots, [])
+
+    def test_invalid(self):
+        in_content = '<invalid>Valid</invalid>'
+        out_content, slots = self.one(in_content)
+        self.assertEqual(out_content, '<slot id="65e4e4f9-734c-388c-9dae-38dc78bb723b"/>')
+        self.assertEqual(slots, [{'display': 'carousel',
+            'media': [{'embed_code': u'<invalid>Valid</invalid>', 'type': 'embed'}],
+            'relevance': 'inline',
+            'uuid': '65e4e4f9-734c-388c-9dae-38dc78bb723b'}])
