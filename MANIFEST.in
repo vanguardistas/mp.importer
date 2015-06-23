@@ -1,2 +1,4 @@
 include README.md
 include LICENSE
+include mp/importer/schema/*.rng
+include mp/importer/schema/*.rnc
