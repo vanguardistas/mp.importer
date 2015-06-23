@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <!-- from https://api.metropublisher.com/doc/mp_rng.html -->
+  <define name="uuid">
+    <data type="string">
+      <param name="pattern">[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}</param>
+    </data>
+  </define>
+  <define name="html_text">
+    <interleave>
+      <zeroOrMore>
+        <text/>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="u">
+          <ref name="html_text"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="strong">
+          <ref name="html_text"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="em">
+          <ref name="html_text"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="sub">
+          <ref name="html_text"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="sup">
+          <ref name="html_text"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="cite">
+          <ref name="html_text"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="mark">
+          <ref name="html_text"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="s">
+          <ref name="html_text"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="small">
+          <ref name="html_text"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="q">
+          <ref name="html_text"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="wbr">
+          <empty/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="a">
+          <ref name="html_text"/>
+          <attribute name="href"/>
+          <optional>
+            <attribute name="title"/>
+          </optional>
+        </element>
+      </zeroOrMore>
+    </interleave>
+  </define>
+  <define name="html_paragraphs">
+    <interleave>
+      <zeroOrMore>
+        <element name="p">
+          <ref name="html_text"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="h4">
+          <ref name="html_text"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="hr">
+          <empty/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="pre">
+          <ref name="html_text"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="blockquote">
+          <interleave>
+            <zeroOrMore>
+              <element name="p">
+                <ref name="html_text"/>
+              </element>
+            </zeroOrMore>
+            <zeroOrMore>
+              <element name="pre">
+                <ref name="html_text"/>
+              </element>
+            </zeroOrMore>
+            <zeroOrMore>
+              <element name="ul">
+                <zeroOrMore>
+                  <element name="li">
+                    <ref name="html_text"/>
+                  </element>
+                </zeroOrMore>
+              </element>
+            </zeroOrMore>
+            <zeroOrMore>
+              <element name="ol">
+                <zeroOrMore>
+                  <element name="li">
+                    <ref name="html_text"/>
+                  </element>
+                </zeroOrMore>
+              </element>
+            </zeroOrMore>
+          </interleave>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="ul">
+          <zeroOrMore>
+            <element name="li">
+              <ref name="html_text"/>
+            </element>
+          </zeroOrMore>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="ol">
+          <zeroOrMore>
+            <element name="li">
+              <ref name="html_text"/>
+            </element>
+          </zeroOrMore>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="slot">
+          <attribute name="id">
+            <ref name="uuid"/>
+          </attribute>
+        </element>
+      </zeroOrMore>
+    </interleave>
+  </define>
+  <start>
+    <element name="div">
+      <ref name="html_paragraphs"/>
+    </element>
+  </start>
+</grammar>

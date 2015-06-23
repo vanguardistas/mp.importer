@@ -1,0 +1,35 @@
+# from https://api.metropublisher.com/doc/mp_rng.html
+
+uuid = xsd:string { pattern = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}" }
+
+html_text = text* &
+            element u { html_text }* &
+            element strong { html_text }* &
+            element em { html_text }* &
+            element sub { html_text }* &
+            element sup { html_text }* &
+            element cite { html_text }* &
+            element mark { html_text }* &
+            element s { html_text }* &
+            element small { html_text }* &
+            element q { html_text }* &
+            element wbr {empty}* &
+            element a { html_text,
+                         attribute href { text },
+                         attribute title { text }?
+                      }*
+
+html_paragraphs = element p {html_text}* &
+                  element h4 {html_text}* &
+                  element hr {empty}* &
+                  element pre {html_text}* &
+                  element blockquote { element p { html_text }* &
+                                       element pre {html_text}* &
+                                       element ul { element li { html_text }* }* &
+                                       element ol { element li { html_text }* }*
+                                      }* &
+                  element ul { element li { html_text }* }* &
+                  element ol { element li { html_text }* }* &
+                  element slot {attribute id {uuid}}*
+
+start = element div { html_paragraphs }
