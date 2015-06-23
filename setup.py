@@ -22,6 +22,7 @@ setup(name="mp.importer",
       author="Vanguardistas LLC",
       author_email='brian@vanguardistas.net',
       install_requires=install_requires,
+      include_package_data=True,
       classifiers=[
           "Intended Audience :: Developers",
           "Operating System :: OS Independent",
