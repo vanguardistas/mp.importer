@@ -1,9 +1,4 @@
-import os
 from unittest import TestCase
-import collections
-from collections import namedtuple
-from collections import Iterable
-from itertools import *
 
 _missing = object()
 
