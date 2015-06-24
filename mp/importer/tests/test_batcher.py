@@ -5,18 +5,27 @@ from collections import namedtuple
 from collections import Iterable
 from itertools import *
 
+_missing = object()
 
 class TestBatcher(TestCase):
 
-    def one(self, source, **kw): 								# **kw allows passing only some keyworks (the others will be set to default by batcher), easier for user
+    def one(self, source, end_batch_callback=_missing, **kw): 								# **kw allows passing only some keyworks (the others will be set to default by batcher), easier for user
         log = []
-        def end_batch():                
-            log.append('X')
+        if end_batch_callback is _missing:
+            def end_batch_callback():
+                log.append('X')
         from .. import batcher
-        batcher = batcher.run_in_batches(source, end_batch, **kw)				# pass direclty **kw to batcher
+        batcher = batcher.run_in_batches(
+                source,
+                end_batch_callback=end_batch_callback,
+                **kw)
         for letter in batcher:              
             log.append(letter)
         return ''.join(log)
+
+    def test_no_end_batch_callback(self):
+        result = self.one('abcdefg', end_batch_callback=None)
+        self.assertEqual(result, 'abcdefg')
 
     def test_Make_batches(self):
         result = self.one('abcdefg')			
