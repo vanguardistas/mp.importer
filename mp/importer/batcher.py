@@ -47,11 +47,12 @@ def run_in_batches(iterable, end_batch_callback=None, batch_size=2, batch_start=
             ended = False
             yield k 
             if position_in_batch == 0: 								# ends completed batches
-                end_batch_callback()
+                if end_batch_callback is not None:
+                    end_batch_callback()
                 ended = True
         if max_batches is not None and current_batch == batch_start + max_batches:		# if gets maximum allowed batches, break 
             break
-    if ended is False:
+    if ended is False and end_batch_callback is not None:
         end_batch_callback()
 
 
