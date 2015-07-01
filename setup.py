@@ -1,5 +1,7 @@
 import os
 import sys
+
+import version
 from setuptools import setup, find_packages
 
 _here = os.path.dirname(__file__)
@@ -14,7 +16,7 @@ if sys.version_info[0] == 2:
     install_requires.append('mock')
 
 setup(name="mp.importer",
-      version="0.1",
+      version=version.getVersion(),
       description="Utilities to ease imports of content to MetroPublisher.",
       packages=find_packages(),
       long_description=README,

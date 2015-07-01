@@ -1,0 +1,27 @@
+Source: mp.importer
+Section: python
+Priority: extra
+Maintainer: Brian Sutherland <brian@vanguardistas.net>
+Build-Depends: debhelper, python-all, python-setuptools, python-tox
+Standards-Version: 3.9.2
+
+Package: python-mp.importer
+Architecture: all
+Depends: ${python:Depends}, ${misc:Depends}
+Provides: ${python:Provides}
+Description: mp.importer
+ mp.importer
+
+Package: python3-mp.importer
+Architecture: all
+Depends: ${python:Depends}, ${misc:Depends}
+Provides: ${python:Provides}
+Description: mp.importer
+ mp.importer
+
+Package: pypy-mp.importer
+Architecture: all
+Depends: ${python:Depends}, ${misc:Depends}
+Provides: ${python:Provides}
+Description: mp.importer
+ mp.importer
