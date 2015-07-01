@@ -5,7 +5,7 @@ import pkgutil
 import icu
 
 _trans = icu.Transliterator.createInstance('Any-Latin; Latin-ASCII')
-t
+
 def _load_stopwords(language):
     """Load a list of stopwords from a file.
 
@@ -30,7 +30,7 @@ def _remove_stopwords(txt, language='en'):
         txt = ' '.join(words)
     return txt
 
-def urlname_suggester(txt, language='en'):
+def suggest(txt, language='en'):
     """Convert any unicode string to a "safe" urlname.
 
     If conversion results in an empty string, the original string will be returned

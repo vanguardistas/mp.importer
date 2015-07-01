@@ -2,11 +2,11 @@
 
 from unittest import TestCase
 
-class Test_urlname_suggester(TestCase):
+class Test_suggester(TestCase):
 
     def assertSuggestion(self, input, suggestion, language='en'):
-        from ..urlname import urlname_suggester
-        rslt = urlname_suggester(input, language=language)
+        from ..urlname import suggest
+        rslt = suggest(input, language=language)
         self.assertEqual(suggestion, rslt)
 
     def test_nonlatin(self):
