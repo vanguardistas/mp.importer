@@ -2,3 +2,4 @@ include README.md
 include LICENSE
 include mp/importer/schema/*.rng
 include mp/importer/schema/*.rnc
+include mp/importer/stopwords/*.txt

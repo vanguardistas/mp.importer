@@ -8,7 +8,7 @@ f = open(os.path.join(_here, 'README.md'), 'r')
 README = f.read()
 f.close()
 
-install_requires = ['lxml']
+install_requires = ['lxml', 'PyICU']
 if sys.version_info[0] == 2:
     # python2 does not have mock in the standard lib
     install_requires.append('mock')
