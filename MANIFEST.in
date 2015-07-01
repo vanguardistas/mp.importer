@@ -1,5 +1,9 @@
 include README.md
 include LICENSE
+include RELEASE-VERSION
 include mp/importer/schema/*.rng
 include mp/importer/schema/*.rnc
 include mp/importer/stopwords/*.txt
+include debian/*
+include debian/source/*
+include version.py
