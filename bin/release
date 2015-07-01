@@ -71,4 +71,4 @@ if s == 'y':
     msg = 'releasing {} from {}'.format(relver, current_branch)
     check_call(['git', 'commit', '-m', msg])
     check_call(['git', 'tag', '-a', '-m', msg, 'release/{}'.format(relver)])
-    check_call(['git', 'push', '--follow-tags'])
+    check_call(['git', 'push', '--follow-tags', 'upstream'])
