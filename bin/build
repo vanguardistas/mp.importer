@@ -13,7 +13,6 @@ os.chdir('dist')
 v_parts = version.split('.')
 if len(v_parts) == 2 and v_parts[0].isdigit() and v_parts[1].isdigit():
     print('Building release {}'.format(version))
-    major, minor = v_parts
     check_call(['tar', '-xzf', '{}-{}.tar.gz'.format(pkg, version)])
     os.chdir('{}-{}'.format(pkg, version))
     check_call(['dch', '-v',  version, '--distribution', 'unstable', '--force-distribution', 'Release {}'.format(version)])
