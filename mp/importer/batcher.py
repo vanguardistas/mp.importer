@@ -70,7 +70,7 @@ def add_arguments(parser):
     parser.add_argument('--max-batches', dest='max_batches', action='store', default=None, 
                        type=int, help="Maximum amount of batches imported")
     parser.add_argument('--percentage', dest='percentage', action='store', default=None,	
-                       type=int, help="Percentage of elements to be randomly sampled (0-100%)")	
+                       type=int, help="Percentage of elements to be randomly sampled (0-100%%)")	
     parser.add_argument('--seed', dest='seed', action='store', default=None, 
                        type=int, help="Seed to reproduce last imported batch")	
 
