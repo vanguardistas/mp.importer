@@ -56,18 +56,28 @@ class TestParser(TestCase):
         parser.add_argument('--from-db', dest='from_db', help="source database")		
         return parser
 	
+    def test_help(self):
+        # printing help used to error
+        from .. import batcher
+        try:
+            from StringIO import StringIO
+        except ImportError:
+            from io import StringIO
+        parser = self.create_test_parser()
+        batcher.add_arguments(parser)					
+        parser.print_help(file=StringIO())
 
     def test_Add_arguments(self):
         from .. import batcher
         parser = self.create_test_parser()
         batcher.add_arguments(parser)					
-        args = ['./bin/import_from_godengo_batcher.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--batch-size', '10', '--max-batches', '2']
+        args = ['./bin/import.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--batch-size', '10', '--max-batches', '2']
         options = parser.parse_args(args[1:])							# parsing done in the main function and for all arguments except program name
         self.assertEqual(options.batch_size, 10)
 
     def test_Get_batcher_args_alline(self):
         from .. import batcher
-        args = ['./bin/import_from_godengo_batcher.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--batch-size', '10', '--max-batches', '2']
+        args = ['./bin/import.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--batch-size', '10', '--max-batches', '2']
         parser = self.create_test_parser()		
         batcher.add_arguments(parser)
         options = parser.parse_args(args[1:])													 
@@ -87,7 +97,7 @@ class TestParser(TestCase):
 
     def test_Get_batcher_args_more(self):
         from .. import batcher
-        args = ['./bin/import_from_godengo_batcher.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--batch-size', '10', '--percentage', '50']
+        args = ['./bin/import.py', '--db', 'test_batcher', '--from-db', 'postgresql:///cityscene', '--batch-size', '10', '--percentage', '50']
         parser = self.create_test_parser()									
         batcher.add_arguments(parser)
         options = parser.parse_args(args[1:])													 
