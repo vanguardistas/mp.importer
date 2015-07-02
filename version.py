@@ -66,6 +66,7 @@ def readGitVersion():
                                  '--match', 'release/[0-9.]*'),
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         data, _ = proc.communicate()
+        data = data.decode('utf-8')
         if proc.returncode:
             return None
         ver = data.splitlines()[0].strip()
@@ -117,7 +118,3 @@ def getVersion():
     if version != release_version:
         writeReleaseVersion(version)
     return version
-
-
-if __name__ == '__main__':
-    print getVersion()
