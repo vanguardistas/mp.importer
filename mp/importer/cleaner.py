@@ -196,10 +196,13 @@ def slot(context, relevance='inline', display='carousel', idx_node=None):
         parent.insert(idx, snode)
     return snode, s
 
-def _to_etree(content):
-    doc = etree.HTML(u'<html><body>{}</body></html>'.format(content))
-    doc = doc.find('body')
-    doc.tag = 'div'
+def _to_etree(content, import_as):
+    if import_as == 'html':
+        doc = etree.HTML(u'<html><body>{}</body></html>'.format(content))
+        doc = doc.find('body')
+        doc.tag = 'div'
+    elif import_as == 'xml':
+        doc = etree.XML(u'<div>{}</div>'.format(content))
     return doc
 
 def _inner_to_string(root, pretty_print=False):
@@ -213,19 +216,35 @@ def clean_content(
         context,
         content,
         cleaners=CLEANERS_CORRECT,
-        fallback_cleaners=()):
+        fallback_cleaners=(),
+        import_as='xml'):
     """Clean the content for import to metropublisher.
 
-    Returns a tuple of (content, media_slots) where content is the cleaned
-    content and media_slot is a list of slot objects:
+    cleaners:
+            An iterable of cleaning functions to call. These functions are
+            called in order and passed the context and lxml node containing
+            the content.
+    fallback_cleaners:
+            Same as cleaners. However these are used if the cleaners fail to
+            produce a valid document. These will be called on the ORIGINAL content
+            and the result placed into an embed media.
+    import_as:
+            Either 'xml' or 'html'. Chooses the parser for the content, 'xml' is
+            used for xml which contains non-HTML tags and/or is high quality.
+            'html' is used for HTML and can process almost everything like the
+            browser would.
+
+    Returns a tuple of (content, media_slots, used_fallback) where content is
+    the cleaned content and media_slot is a list of slot objects:
 
     https://api.metropublisher.com/doc/resources/content.html#resource-get-content-slot-get
     """
     assert context.slots is None
     context = context._replace(slots=[])
-    doc = _to_etree(content)
+    doc = _to_etree(content, import_as)
     for cleaner in cleaners:
-        cleaner(context, doc)
+        r = cleaner(context, doc)
+        assert r is None
     schema = get_schema()
     is_valid = schema.validate(doc)
     if not is_valid:
@@ -235,9 +254,10 @@ def clean_content(
         # embed media
         context.prob('error', 'Invalid content pushed to media embed')
         context = context._replace(slots=[])
-        doc = _to_etree(content)
+        doc = _to_etree(content, import_as)
         for cleaner in fallback_cleaners:
-            cleaner(context, doc)
+            r = cleaner(context, doc)
+            assert r is None
         snode, s = slot(context)
         s['media'].append(dict(
             type='embed',
