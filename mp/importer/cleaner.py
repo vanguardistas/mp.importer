@@ -252,7 +252,7 @@ def clean_content(
         # we thow away the old context and fallback to the
         # fallback_cleaners and put the result into an
         # embed media
-        context.prob('error', 'Invalid content pushed to media embed')
+        context.prob('error', 'Invalid content pushed to media embed', 'Page had invalid XML after cleaning:{error_log}\ncontent:\n{content}'.format(content=content, error_log=schema.error_log))
         context = context._replace(slots=[])
         doc = _to_etree(content, import_as)
         for cleaner in fallback_cleaners:

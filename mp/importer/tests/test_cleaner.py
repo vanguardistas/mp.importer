@@ -240,7 +240,7 @@ class Test_clean_content(TestCase):
                     ns = ns.encode('ascii')
                 return uuid.uuid3(uuid.NAMESPACE_DNS, ns)
 
-            def prob(self, type, msg):
+            def prob(self, type, error, msg=None):
                 pass
 
         return Context(slots=None)
