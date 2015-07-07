@@ -258,6 +258,13 @@ class Test_clean_content(TestCase):
         self.assertEqual(in_content, out_content)
         self.assertEqual(slots, [])
 
+    def test_html(self):
+        in_content = '<p>Valid</p>'
+        out_content, slots, used_fallback = self.one(in_content, import_as='html')
+        self.assertFalse(used_fallback)
+        self.assertEqual(in_content, out_content)
+        self.assertEqual(slots, [])
+
     def test_invalid(self):
         in_content = '<invalid>Valid</invalid>'
         out_content, slots, used_fallback = self.one(in_content)
