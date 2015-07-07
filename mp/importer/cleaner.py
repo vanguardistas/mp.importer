@@ -233,6 +233,7 @@ def clean_content(
         # we thow away the old context and fallback to the
         # fallback_cleaners and put the result into an
         # embed media
+        context.prob('error', 'Invalid content pushed to media embed')
         context = context._replace(slots=[])
         doc = _to_etree(content)
         for cleaner in fallback_cleaners:
@@ -244,4 +245,5 @@ def clean_content(
         doc = etree.Element('div')
         doc.append(snode)
     content = _inner_to_string(doc)
-    return content, context.slots
+    used_fallback = not is_valid
+    return content, context.slots, used_fallback

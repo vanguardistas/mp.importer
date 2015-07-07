@@ -240,6 +240,9 @@ class Test_clean_content(TestCase):
                     ns = ns.encode('ascii')
                 return uuid.uuid3(uuid.NAMESPACE_DNS, ns)
 
+            def prob(self, type, msg):
+                pass
+
         return Context(slots=None)
 
     def one(self, content, context=None, **kw):
@@ -250,13 +253,15 @@ class Test_clean_content(TestCase):
 
     def test_basic(self):
         in_content = '<p>Valid</p>'
-        out_content, slots = self.one(in_content)
+        out_content, slots, used_fallback = self.one(in_content)
+        self.assertFalse(used_fallback)
         self.assertEqual(in_content, out_content)
         self.assertEqual(slots, [])
 
     def test_invalid(self):
         in_content = '<invalid>Valid</invalid>'
-        out_content, slots = self.one(in_content)
+        out_content, slots, used_fallback = self.one(in_content)
+        self.assertTrue(used_fallback)
         self.assertEqual(out_content, '<slot id="65e4e4f9-734c-388c-9dae-38dc78bb723b"/>')
         self.assertEqual(slots, [{'display': 'carousel',
             'media': [{'embed_code': u'<invalid>Valid</invalid>', 'type': 'embed'}],
