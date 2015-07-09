@@ -196,13 +196,18 @@ def slot(context, relevance='inline', display='carousel', idx_node=None):
         parent.insert(idx, snode)
     return snode, s
 
-def _to_etree(content, import_as):
+def _to_etree(context, content, import_as):
     if import_as == 'html':
         doc = etree.HTML(u'<html><body>{}</body></html>'.format(content))
         doc = doc.find('body')
         doc.tag = 'div'
     elif import_as == 'xml':
-        doc = etree.XML(u'<div>{}</div>'.format(content))
+        try:
+            doc = etree.XML(u'<div>{}</div>'.format(content))
+        except etree.XMLSyntaxError as e:
+            # if this happens a lot the user should consider only using html
+            context.prob('error', 'Invalid XML Syntax, falling back to html.', str(e))
+            return _to_etree(context, content, 'html')
     return doc
 
 def _inner_to_string(root, pretty_print=False):
@@ -241,7 +246,7 @@ def clean_content(
     """
     assert context.slots is None
     context = context._replace(slots=[])
-    doc = _to_etree(content, import_as)
+    doc = _to_etree(context, content, import_as)
     for cleaner in cleaners:
         r = cleaner(context, doc)
         assert r is None
@@ -252,9 +257,9 @@ def clean_content(
         # we thow away the old context and fallback to the
         # fallback_cleaners and put the result into an
         # embed media
-        context.prob('error', 'Invalid content pushed to media embed', 'Page had invalid XML after cleaning:{error_log}\ncontent:\n{content}'.format(content=content, error_log=schema.error_log))
+        context.prob('error', 'Invalid content pushed to media embed', u'Page had invalid XML after cleaning:{error_log}\ncontent:\n{content}'.format(content=content, error_log=schema.error_log))
         context = context._replace(slots=[])
-        doc = _to_etree(content, import_as)
+        doc = _to_etree(context, content, import_as)
         for cleaner in fallback_cleaners:
             r = cleaner(context, doc)
             assert r is None, 'cleaner {} returned {}'.format(repr(cleaner), repr(r))
