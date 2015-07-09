@@ -257,7 +257,7 @@ def clean_content(
         doc = _to_etree(content, import_as)
         for cleaner in fallback_cleaners:
             r = cleaner(context, doc)
-            assert r is None
+            assert r is None, 'cleaner {} returned {}'.format(repr(cleaner), repr(r))
         snode, s = slot(context)
         s['media'].append(dict(
             type='embed',
