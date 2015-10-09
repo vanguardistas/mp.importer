@@ -112,14 +112,14 @@ def remove_useless_br(context, content):
             context.prob('fuzzy_fix', 'remove <br/> before after element')
             continue
         if node is parent[0] and not remove_all_whitespace(parent.text):
-            if parent.tag in BLOCK_ELEMENTS:
+            grandparent = parent.getparent()
+            if parent.tag in BLOCK_ELEMENTS or grandparent is None:
                 parent.text = parent.text or ''
                 parent.text += node.tail or ''
                 parent.remove(node)
                 context.prob('fuzzy_fix', 'remove leading <br/> in block element')
                 continue
             else:
-                grandparent = parent.getparent()
                 if not remove_all_whitespace(grandparent.text) and parent is grandparent[0]\
                         and grandparent.tag in BLOCK_ELEMENTS:
                     parent.text = parent.text or ''
@@ -128,13 +128,13 @@ def remove_useless_br(context, content):
                     context.prob('fuzzy_fix', 'remove leading <br/> in block element')
                     continue
         if node is parent[-1] and not remove_all_whitespace(node.tail):
+            grandparent = parent.getparent()
             # if the br is the last node in the parent
-            if parent.tag not in BLOCK_ELEMENTS:
+            if parent.tag not in BLOCK_ELEMENTS and grandparent is not None:
                 # let's look at our parent's parent, maybe that's a block tag
                 # we can still remove the br if we are something like <a>text<br/></a></p>
                 if remove_all_whitespace(parent.tail):
                     continue
-                grandparent = parent.getparent()
                 if parent is not grandparent[-1]:
                     continue
                 if grandparent.tag not in BLOCK_ELEMENTS:

@@ -71,6 +71,15 @@ class Test_remove_useless_br(CleanerTest):
         self.assertCleaned(
                 '<p>remove br</p>\n<br/>a',
                 '<p>remove br</p>\na')
+        self.assertCleaned(
+                "<br/>stuff<i>stuff</i>",
+                'stuff<i>stuff</i>')
+        self.assertCleaned(
+                "<i>otehr</i>stuff<br/>",
+                '<i>otehr</i>stuff')
+        self.assertCleaned(
+                "stuff<br/>more stuff",
+                'stuff<br/>more stuff')
 
     def test_first_br_in_p(self):
         # we clean the first br
