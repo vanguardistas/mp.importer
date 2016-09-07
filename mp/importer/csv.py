@@ -123,153 +123,163 @@ def get_geoname(title, pcode, urlname, gcity):
 
 ########### api functions
 
+# make a class “LocationUpdater" that has method upsert_location, but i can always use insert_location alone
+# call it - LocationUpdater.upsert_location(api, loc_dict, loc_uuid, file_cfg['INSTANCE_ID'])
 
-def put_location(api,loc_dict,loc_uuid,INSTANCE_ID):
-    """chek if item exists, then update/insert accordingly
-    """
-    EXISTING_LOCS = api.GET('/%s/locations?fields=uuid-urlname&rpp=100' % INSTANCE_ID)
-    there = False
-    while 'next' in EXISTING_LOCS:
-        EXISTING_LOCS = api.GET('/%s/locations?%s' %(INSTANCE_ID, EXISTING_LOCS['next']))
-        for item in EXISTING_LOCS['items']:
-            if item[1] == loc_dict['urlname']:  # match by urlname - TODO better use uuid?													
-                there = True
-    if there is True:
-        update_location(api, loc_dict, loc_uuid, item)
-    else:
-        insert_location(api, loc_dict, loc_uuid)
+class LocationUpdater:
+    def __init__(self, api, instance_id):
+        self.api = api
+        self.instance_id = instance_id
 
 
-def insert_location(api, loc_dict, loc_uuid, INSTANCE_ID):
-    """put item into database
-    """
-    status = 0
-    result = api.PUT('/%s/locations/%s' % (INSTANCE_ID, loc_uuid), loc_dict)
-    check = api.GET('/%s/locations/%s' % (INSTANCE_ID, loc_uuid))
-    if check is not None:						
-        status = 1
-    return status
+    def upsert_location(self, loc_dict, loc_uuid):					
+        """chek if item exists, then update/insert accordingly
+        """    
+        EXISTING_LOCS = api.GET('/%s/locations?fields=uuid-urlname&rpp=100' % INSTANCE_ID)
+        there = False
+        while 'next' in EXISTING_LOCS:
+            EXISTING_LOCS = api.GET('/%s/locations?%s' %(INSTANCE_ID, EXISTING_LOCS['next']))
+            for item in EXISTING_LOCS['items']:
+                if item[1] == loc_dict['urlname']:  # match by urlname - TODO better use uuid?													
+                    there = True
+        if there is True:
+            update_location(api, loc_dict, loc_uuid, item)
+        else:    
+            insert_location(api, loc_dict, loc_uuid)
 
 
-def update_location(api, loc_dict, loc_uuid INSTANCE_ID):
-    """update item in database
-       the script must pass the correct fields (only those that need updating, or all admitted fields)  
-       https://api.metropublisher.com/resources/location.html#resource-patch-location-patch
-    """
-    status = 0
-    result = api.PATCH('/%s/locations/%s' % (INSTANCE_ID, loc_uuid), loc_dict) # TODO the script must pass the correct dictionary, or I can create it here
-    check = api.GET('/%s/locations/%s' % (INSTANCE_ID, loc_uuid)) 
-    if check is not None: # TODO check a field to make sure has been updated, ex. modification date!
-        status = 1
-    return status
+    def insert_location(self, loc_dict, loc_uuid):
+        """put item into database       
+        """
+        status = 0
+        result = api.PUT('/%s/locations/%s' % (INSTANCE_ID, loc_uuid), loc_dict)
+        check = api.GET('/%s/locations/%s' % (INSTANCE_ID, loc_uuid))
+        if check is not None:						
+            status = 1
+        return status
+
+
+    def update_location(self, loc_dict, loc_uuid):
+        """update item in database
+           the script must pass the correct fields (only those that need updating, or all admitted fields?)  
+           https://api.metropublisher.com/resources/location.html#resource-patch-location-patch
+        """
+        status = 0
+        result = api.PATCH('/%s/locations/%s' % (INSTANCE_ID, loc_uuid), loc_dict) # TODO the script must pass the correct dictionary, or I can create it here
+        check = api.GET('/%s/locations/%s' % (INSTANCE_ID, loc_uuid)) 
+        if check is not None: # TODO check a field to make sure has been updated, ex. modification date!
+            status = 1
+        return status
 
 
 
+#### same for tags
 # TODO add to context in the main script?
 CREATED_CATS = {}			
 CREATED_TAGS = {}	
 
+class TagUpdater:
+    def __init__(self, api, instance_id):
+        self.api = api
+        self.instance_id = instance_id
 
-def add_tags(api, tagcat_dictionary, loc_uuid):
-    """ Creates categories if not there
-        input is a dictionary of type {tag1:cat1,tag2:None,tag3:cat1,cat2} # tag can be in multiple categories, or can have no category
-        Adds tag to category, then tags the location
-    """
-    for tag in tagcat_dictionary:
-        category = tagcat_dictionary.get(tag)
-        if category is not None:
-           cat_uuid = uuid.uuid3(namespace, category)
-           create_cat(api, cat, cat_uuid)
-        else:
-           cat_uuid = None
-        # create tag with or without cat
-        tag_uuid = uuid.uuid3(namespace, tag) 
-        created, tag_uuid = create_tag(api, tag, tag_uuid, cat_uuid) 		
-        if created == 1:
-            tag = put_tag(api, tag_uuid, loc_uuid)			
+    def upsert_tags(self, tagcat_dictionary, loc_uuid)   
+        """ Creates categories if not there
+            input is a dictionary of type {tag1:cat1,tag2:None,tag3:cat1,cat2} # tag can be in multiple categories, or can have no category
+            Adds tag to category, then tags the location
+        """
+        for tag in tagcat_dictionary:
+            category = tagcat_dictionary.get(tag)
+            if category is not None:
+               cat_uuid = uuid.uuid3(namespace, category)
+               create_cat(api, cat, cat_uuid, INSTANCE_ID)
+            else:
+               cat_uuid = None
+            tag_uuid = uuid.uuid3(namespace, tag) 
+            created, tag_uuid = create_tag(api, tag, tag_uuid, cat_uuid, INSTANCE_ID) 		
+            if created == 1:
+                tag = put_tag(api, tag_uuid, loc_uuid, INSTANCE_ID)			
 
 
-def create_cat(api, cat, cat_uuid):
-    EXISTING_CATS = api.GET('/%s/tags/categories?fields=uuid-title&rpp=100' %INSTANCE_ID)				
-    there = 0
-    status = 0
-    if not 'next' in EXISTING_CATS:
-        for item in EXISTING_CATS['items']:
-            if item[1] == suggest_urlname(cat):  												
-                there = 1
-                cat_uuid = item[0]																
-    else:
-        while 'next' in EXISTING_CATS:																
-            EXISTING_CATS = api.GET('/%s/tags/categories?%s' %(INSTANCE_ID, EXISTING_CATS['next']))		
+    def create_cat(self, cat, cat_uuid):
+        EXISTING_CATS = api.GET('/%s/tags/categories?fields=uuid-title&rpp=100' %INSTANCE_ID)				
+        there = 0
+        status = 0
+        if not 'next' in EXISTING_CATS:
             for item in EXISTING_CATS['items']:
                 if item[1] == suggest_urlname(cat):  												
                     there = 1
                     cat_uuid = item[0]																
-    if cat in CREATED_CATS:
-        cat_uuid = CREATED_CATS_NOW.get(cat)				# TODO what if we want to update the cat? 
-    elif there == 0:																																					
-        cat_creation_dict = {}
-        cat_creation_dict['title'] = str(cat)
-        cat_creation = api.PUT("/%s/tags/categories/%s" % (INSTANCE_ID, cat_uuid), cat_creation_dict) 
-        check = api.GET('/%s/tags/categories/%s' % (INSTANCE_ID, cat_uuid))    							
-        if check is not None:						
-           status = 1
-        CREATED_CATS[cat] = cat_uuid     
-    return status, cat_uuid
+        else:
+            while 'next' in EXISTING_CATS:																
+                EXISTING_CATS = api.GET('/%s/tags/categories?%s' %(INSTANCE_ID, EXISTING_CATS['next']))		
+                for item in EXISTING_CATS['items']:
+                    if item[1] == suggest_urlname(cat):  												
+                        there = 1
+                        cat_uuid = item[0]																
+        if cat in CREATED_CATS:
+            cat_uuid = CREATED_CATS_NOW.get(cat)				# TODO what if we want to update the cat? 
+        elif there == 0:																																					
+            cat_creation_dict = {}
+            cat_creation_dict['title'] = str(cat)
+            cat_creation = api.PUT("/%s/tags/categories/%s" % (INSTANCE_ID, cat_uuid), cat_creation_dict) 
+            check = api.GET('/%s/tags/categories/%s' % (INSTANCE_ID, cat_uuid))    							
+            if check is not None:						
+               status = 1
+            CREATED_CATS[cat] = cat_uuid     
+        return status, cat_uuid
 
 
-def create_tag(api, tag, tag_uuid, cat_uuid=None):
-    """ create the tag if not in the destination db
-    """
-    EXISTING_TAGS = api.GET('/%s/tags?fields=uuid-urlname&rpp=100' %INSTANCE_ID)				
-    there = 0
-    status = 0
-    if not 'next' in EXISTING_TAGS:
-        for item in EXISTING_TAGS['items']:
-            if item[1] == suggest_urlname(tag):  												
-                there = 1
-                tag_uuid = item[0]
-                status = 1															
-    else:
-        while 'next' in EXISTING_TAGS:																
-            EXISTING_TAGS = api.GET('/%s/tags?%s' %(INSTANCE_ID, EXISTING_TAGS['next']))
+    def create_tag(self, tag, tag_uuid, cat_uuid=None):
+        """ create the tag if not in the destination db
+        """
+        EXISTING_TAGS = api.GET('/%s/tags?fields=uuid-urlname&rpp=100' %INSTANCE_ID)				
+        there = 0
+        status = 0
+        if not 'next' in EXISTING_TAGS:
             for item in EXISTING_TAGS['items']:
                 if item[1] == suggest_urlname(tag):  												
                     there = 1
-                    tag_uuid = item[0]																
-                    status = 1
-    if tag in CREATED_TAGS:
-        tag_uuid = CREATED_TAGS.get(tag) # TODO  what if we want to update tag?
-    elif there == 0:	
-        tag_creation_dict = {}
-        tag_creation_dict['urlname'] = suggest_urlname(tag)
-        tag_creation_dict['title'] = str(tag)
-        tag_creation_dict['category'] = "Subject"
-        tag_creation_dict['created'] = str(datetime.datetime.now())	
-        tag_creation_dict['modified'] = str(datetime.datetime.now())
-        tag_creation = api.PUT("/%s/tags/%s" % (INSTANCE_ID, tag_uuid), tag_creation_dict) 
-        check = api.GET('/%s/tags/%s' % (INSTANCE_ID, tag_uuid))      							
-        if check is not None:	
-           status = 1
-        CREATED_TAGS[tag] = tag_uuid
-        if cat_uuid is not None:
-            tag_cat_dict = {}
-            tag_cat_dict['tag_uuid'] = str(tag_uuid)
-            tagcat_creation = api.POST("/%s/tags/categories/%s/tags" % (INSTANCE_ID, cat_uuid), tag_cat_dict) 
-    return status, tag_uuid
+                    tag_uuid = item[0]    
+                    status = 1				    											
+        else:
+            while 'next' in EXISTING_TAGS:																
+                EXISTING_TAGS = api.GET('/%s/tags?%s' %(INSTANCE_ID, EXISTING_TAGS['next']))
+                for item in EXISTING_TAGS['items']:
+                    if item[1] == suggest_urlname(tag):  												
+                        there = 1
+                        status = 1
+        if tag in CREATED_TAGS:
+            tag_uuid = CREATED_TAGS.get(tag) # TODO  what if we want to update tag?
+        elif there == 0:	
+            tag_creation_dict = {}
+            tag_creation_dict['urlname'] = suggest_urlname(tag)
+            tag_creation_dict['title'] = str(tag)
+            tag_creation_dict['category'] = "Subject"
+            tag_creation_dict['created'] = str(datetime.datetime.now())	
+            tag_creation_dict['modified'] = str(datetime.datetime.now())
+            tag_creation = api.PUT("/%s/tags/%s" % (INSTANCE_ID, tag_uuid), tag_creation_dict) 
+            check = api.GET('/%s/tags/%s' % (INSTANCE_ID, tag_uuid))      							
+            if check is not None:	
+               status = 1
+            CREATED_TAGS[tag] = tag_uuid
+            if cat_uuid is not None:
+                tag_cat_dict = {}
+                tag_cat_dict['tag_uuid'] = str(tag_uuid)
+                tagcat_creation = api.POST("/%s/tags/categories/%s/tags" % (INSTANCE_ID, cat_uuid), tag_cat_dict) 
+        return status, tag_uuid
 
 
-
-def put_tag(api, tag_uuid, loc_uuid):   														
-    """ Tag the location
-    """
-    tag_dict = {}
-    tag_dict['created'] = str(datetime.datetime.now())	
-    result = api.PUT('/%s/tags/%s/describes/%s' % (INSTANCE_ID, tag_uuid, loc_uuid), tag_dict)
-    check = api.GET('/%s/tags/%s/describes/%s' % (INSTANCE_ID, tag_uuid, loc_uuid))      							
-    if result is not None:						
-        status = 1
-    return status
+    def put_tag(self, tag_uuid, loc_uuid):   														
+        """ Tag the location
+        """
+        tag_dict = {}
+        tag_dict['created'] = str(datetime.datetime.now())	
+        result = api.PUT('/%s/tags/%s/describes/%s' % (INSTANCE_ID, tag_uuid, loc_uuid), tag_dict)
+        check = api.GET('/%s/tags/%s/describes/%s' % (INSTANCE_ID, tag_uuid, loc_uuid))      							
+        if result is not None:						
+            status = 1
+        return status
     
 
 
