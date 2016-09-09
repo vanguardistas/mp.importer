@@ -85,7 +85,8 @@ def get_coords(address_key, GOOGLE_API_KEY, urlname):
     if '\n' in request:
         request = request.replace('\n','')
     response = urllib.request.urlopen(request)
-    data = json.load(response)['results']					
+    str_response = response.readall().decode('utf-8')
+    data = json.loads(str_response)['results']					
     try:
         lat = data[0]['geometry']['location']['lat']
     except:
@@ -103,16 +104,17 @@ def get_coords(address_key, GOOGLE_API_KEY, urlname):
     return coords        
 
 
-def get_geoname(title, pcode, urlname, gcity):
+def get_geoname(GEONAME_USER, pcode, gcity):
     """Get geoname from geonames api"""
     geoname_url = 'http://api.geonames.org/searchJSON?q={}&postalcode={}&country=US&maxRows=10&username={}'.format(gcity, pcode, GEONAME_USER)
-    geoname_2 = urllib.request.urlopen(geoname_url)
-    data_2 = json.load(geoname_2)
+    geoname = urllib.request.urlopen(geoname_url)
+    str_geoname = geoname.readall().decode('utf-8')
+    data = json.loads(str_geoname)
     try:
-        geo_id = data_2['geonames'][0]['geonameId']	
-        if 'PP' not in data_2['geonames'][0]['fcode']:		# PP = Populated Places to avoid naming conflict with other administrative units
-            geo_id = data_2['geonames'][1]['geonameId']					
-            if 'PP' not in data_2['geonames'][1]['fcode']:
+        geo_id = data['geonames'][0]['geonameId']	
+        if 'PP' not in data['geonames'][0]['fcode']:		# PP = Populated Places to avoid naming conflict with other administrative units
+            geo_id = data['geonames'][1]['geonameId']					
+            if 'PP' not in data['geonames'][1]['fcode']:
                 raise NotImplementedError		
     except:
         geo_id = None
