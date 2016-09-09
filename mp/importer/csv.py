@@ -5,7 +5,7 @@ The script contains a configuration table that enables storing different profile
 import sys
 import csv
 import json
-import urllib
+import urllib.request
 import logging
 import van_api
 
@@ -84,7 +84,7 @@ def get_coords(address_key, GOOGLE_API_KEY, urlname):
     request = request.replace(' ','_')
     if '\n' in request:
         request = request.replace('\n','')
-    response = urllib.urlopen(request)
+    response = urllib.request.urlopen(request)
     data = json.load(response)['results']					
     try:
         lat = data[0]['geometry']['location']['lat']
@@ -106,7 +106,7 @@ def get_coords(address_key, GOOGLE_API_KEY, urlname):
 def get_geoname(title, pcode, urlname, gcity):
     """Get geoname from geonames api"""
     geoname_url = 'http://api.geonames.org/searchJSON?q={}&postalcode={}&country=US&maxRows=10&username={}'.format(gcity, pcode, GEONAME_USER)
-    geoname_2 = urllib.urlopen(geoname_url)
+    geoname_2 = urllib.request.urlopen(geoname_url)
     data_2 = json.load(geoname_2)
     try:
         geo_id = data_2['geonames'][0]['geonameId']	
