@@ -75,7 +75,7 @@ def encode_utf(row):
 
 ############ geonames and coordinates
 
-def get_coords(address_key, urlname):
+def get_coords(address_key, GOOGLE_API_KEY, urlname):
     """Get geocode for location using the google geocoding api"""		
     request = 'https://maps.googleapis.com/maps/api/geocode/json?address=' 
     request = request + address_key
