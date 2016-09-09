@@ -84,7 +84,7 @@ def get_coords(address_key, urlname):
     request = request.replace(' ','_')
     if '\n' in request:
         request = request.replace('\n','')
-    response = urllib2.urlopen(request)
+    response = urllib.urlopen(request)
     data = json.load(response)['results']					
     try:
         lat = data[0]['geometry']['location']['lat']
@@ -123,7 +123,7 @@ def get_geoname(title, pcode, urlname, gcity):
 
 ########### api functions
 
-# make a class “LocationUpdater" that has method upsert_location, but i can always use insert_location alone
+# make a class LocationUpdater that has method upsert_location, but i can always use insert_location alone
 # call it - LocationUpdater.upsert_location(api, loc_dict, loc_uuid, file_cfg['INSTANCE_ID'])
 
 class LocationUpdater:
@@ -183,7 +183,7 @@ class TagUpdater:
         self.api = api
         self.instance_id = instance_id
 
-    def upsert_tags(self, tagcat_dictionary, loc_uuid)   
+    def upsert_tags(self, tagcat_dictionary, loc_uuid):   
         """ Creates categories if not there
             input is a dictionary of type {tag1:cat1,tag2:None,tag3:cat1,cat2} # tag can be in multiple categories, or can have no category
             Adds tag to category, then tags the location
