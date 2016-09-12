@@ -211,7 +211,11 @@ class TagUpdater:
             for item in EXISTING_CATS['items']:
                 if item[1] == suggest_urlname(cat):  												
                     there = 1
-                    cat_uuid = item[0]																
+                    cat_uuid = item[0]	
+                else:
+                    status = 0
+                    there = 0				    											
+															
         else:
             while 'next' in EXISTING_CATS:																
                 EXISTING_CATS = self.api.GET('/%s/tags/categories?%s' %(INSTANCE_ID, EXISTING_CATS['next']))		
@@ -219,8 +223,13 @@ class TagUpdater:
                     if item[1] == suggest_urlname(cat):  												
                         there = 1
                         cat_uuid = item[0]																
+                    else:
+                        status = 0
+                        there = 0				    											
         if cat in CREATED_CATS:
-            cat_uuid = CREATED_CATS_NOW.get(cat)				# TODO what if we want to update the cat? 
+            cat_uuid = CREATED_CATS_NOW.get(cat)				# TODO what if we want to update the cat?
+            there = 1
+            status = 1 
         elif there == 0:																																					
             cat_creation_dict = {}
             cat_creation_dict['title'] = str(cat)
@@ -243,7 +252,10 @@ class TagUpdater:
                 if item[1] == suggest_urlname(tag):  												
                     there = 1
                     tag_uuid = item[0]    
-                    status = 1				    											
+                    status = 1
+                else:
+                    status = 0
+                    there = 0				    											
         else:
             while 'next' in EXISTING_TAGS:																
                 EXISTING_TAGS = self.api.GET('/%s/tags?%s' %(self.instance_id, EXISTING_TAGS['next']))
@@ -251,8 +263,13 @@ class TagUpdater:
                     if item[1] == suggest_urlname(tag):  												
                         there = 1
                         status = 1
+                    else:
+                        status = 0
+                        there = 0				    											
         if tag in CREATED_TAGS:
             tag_uuid = CREATED_TAGS.get(tag) # TODO  what if we want to update tag?
+            status = 1
+            there = 1
         elif there == 0:	
             tag_creation_dict = {}
             tag_creation_dict['urlname'] = suggest_urlname(tag)
