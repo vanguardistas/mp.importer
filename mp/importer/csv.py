@@ -165,8 +165,10 @@ class LocationUpdater:
            https://api.metropublisher.com/resources/location.html#resource-patch-location-patch
         """
         # TODO I can PATCH only fields that have changed, or PUT all fields - if PATCH, modify loc_dict
+        # maybe for big imports is better to save that time?
         status = 0
-        result = self.api.PATCH('/%s/locations/%s' % (self.instance_id, loc_uuid), loc_dict) 
+        result = self.api.PUT('/%s/locations/%s' % (self.instance_id, loc_uuid), loc_dict)
+        #result = self.api.PATCH('/%s/locations/%s' % (self.instance_id, loc_uuid), loc_dict) 
         check = self.api.GET('/%s/locations/%s' % (self.instance_id, loc_uuid)) 
         if check is not None: # TODO check a field to make sure has been updated, ex. modification date!
             status = 1
