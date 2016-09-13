@@ -125,8 +125,6 @@ def get_geoname(GEONAME_USER, pcode, gcity):
 
 ########### api functions
 
-# make a class LocationUpdater that has method upsert_location, but i can always use insert_location alone
-# call it - LocationUpdater.upsert_location(api, loc_dict, loc_uuid, file_cfg['INSTANCE_ID'])
 
 class LocationUpdater:
     def __init__(self, api, instance_id):
@@ -166,8 +164,9 @@ class LocationUpdater:
            the script must pass the correct fields (only those that need updating, or all admitted fields?)  
            https://api.metropublisher.com/resources/location.html#resource-patch-location-patch
         """
+        # TODO I can PATCH only fields that have changed, or PUT all fields - if PATCH, modify loc_dict
         status = 0
-        result = self.api.PATCH('/%s/locations/%s' % (self.instance_id, loc_uuid), loc_dict) # TODO the script must pass the correct dictionary, or I can create it here
+        result = self.api.PATCH('/%s/locations/%s' % (self.instance_id, loc_uuid), loc_dict) 
         check = self.api.GET('/%s/locations/%s' % (self.instance_id, loc_uuid)) 
         if check is not None: # TODO check a field to make sure has been updated, ex. modification date!
             status = 1
@@ -175,8 +174,9 @@ class LocationUpdater:
 
 
 
-#### same for tags
-# TODO add to context in the main script?
+#### tags/categories
+
+# TODO add to context in the main script? they keep track of the items created during the run
 CREATED_CATS = {}			
 CREATED_TAGS = {}	
 
@@ -226,10 +226,11 @@ class TagUpdater:
                     else:
                         status = 0
                         there = 0				    											
-        if cat in CREATED_CATS:
-            cat_uuid = CREATED_CATS_NOW.get(cat)				# TODO what if we want to update the cat?
+        if cat in CREATED_CATS: # created during this run, no need to update it
+            cat_uuid = CREATED_CATS.get(cat)				
             there = 1
-            status = 1 
+            status = 1
+        # elif ***** 		TODO  what if we want to update cat? 
         elif there == 0:																																					
             cat_creation_dict = {}
             cat_creation_dict['title'] = str(cat)
@@ -266,10 +267,11 @@ class TagUpdater:
                     else:
                         status = 0
                         there = 0				    											
-        if tag in CREATED_TAGS:
-            tag_uuid = CREATED_TAGS.get(tag) # TODO  what if we want to update tag?
+        if tag in CREATED_TAGS: # just created during this run, no need to update
+            tag_uuid = CREATED_TAGS.get(tag) 
             status = 1
             there = 1
+        # elif ***** 		TODO  what if we want to update tag?
         elif there == 0:	
             tag_creation_dict = {}
             tag_creation_dict['urlname'] = suggest_urlname(tag)
