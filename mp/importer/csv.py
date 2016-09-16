@@ -151,15 +151,18 @@ class LocationUpdater:
         """    
         EXISTING_LOCS = self.api.GET('/%s/locations?fields=uuid-urlname&rpp=100' % self.instance_id)
         there = False
+        status = 0
         while 'next' in EXISTING_LOCS:
             EXISTING_LOCS = self.api.GET('/%s/locations?%s' %(self.instance_id, EXISTING_LOCS['next']))
             for item in EXISTING_LOCS['items']:
                 if item[0] == loc_dict['uuid']:  												
                     there = True
         if there is True:
-            self.update_location(self.api, loc_dict, loc_uuid, item)
+            status = self.update_location(self.api, loc_dict, loc_uuid, item)
         else:    
-            self.insert_location(self.api, loc_dict, loc_uuid)
+            status = self.insert_location(self.api, loc_dict, loc_uuid)
+        print ("result of upsert", status)
+        return status
 
 
     def insert_location(self, api, loc_dict, loc_uuid):
