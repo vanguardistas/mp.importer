@@ -57,15 +57,55 @@ def target(request, target_db):
 
 
 
+
+
+
 # define what we expect from this library and write tests
-# not sure if I need all the fixtures for the connection
+# not sure if I need all the fixtures for the connection (api is already tested)
 
-# test also the geonames part...
+# "put_location":
+# 0) if location dict is empty, does nothing
 
-# test put location
 def test_simple():
     from ..mp.importer import csv
-    # assert something
+    api = ...
+    loc_dict = []
+    loc_uuid = None
+    INSTANCE_ID = 0
+    status = csv.put_location(api,loc_dict,loc_uuid,INSTANCE_ID)
+    assert status = 0
+
+
+# 1) if location is new, inserts
+# 2) if location already exists in db, updates
+# 3) if pass twice the same location: first inserts, second updates
+
+
+
+# "add_tags": 
+# 0) if tagcat_dictionary is empty, does nothing
+# 1) new tag without cat 
+# 2) tag with multiple cats
+
+
+
+############3
+
+# test the whole code? create a fake function?
+
+location = ...
+tagcat_dictionary = ...
+
+doit(location, tagcat_dictionary):
+    *** import upsert_location
+    *** import upsert_tags
+    loc_uuid = ****
+    upsert_location(location, loc_uuid)
+    upsert_tags(tagcat_dictionary, loc_uuid)
+
+
+
+
 
 
 

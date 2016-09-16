@@ -75,6 +75,7 @@ def encode_utf(row):
 
 ############ geonames and coordinates
 
+
 def get_coords(address_key, GOOGLE_API_KEY, urlname):
     """Get geocode for location using the google geocoding api"""		
     request = 'https://maps.googleapis.com/maps/api/geocode/json?address=' 
@@ -132,6 +133,19 @@ class LocationUpdater:
         self.instance_id = instance_id
 
 
+    def check_existing_location(self, urlname):
+        """ Get all locations and check if urlname is already there
+        """
+        EXISTING_LOCS = self.api.GET('/%s/locations?fields=uuid-urlname&rpp=100' % self.instance_id)
+        there = False
+        while 'next' in EXISTING_LOCS:
+            EXISTING_LOCS = self.api.GET('/%s/locations?%s' %(self.instance_id, EXISTING_LOCS['next']))
+            for item in EXISTING_LOCS['items']:
+                if item[1] == urlname:  													
+                    there = True
+        return there
+
+
     def upsert_location(self, loc_dict, loc_uuid):					
         """chek if item exists, then update/insert accordingly
         """    
@@ -140,7 +154,7 @@ class LocationUpdater:
         while 'next' in EXISTING_LOCS:
             EXISTING_LOCS = self.api.GET('/%s/locations?%s' %(self.instance_id, EXISTING_LOCS['next']))
             for item in EXISTING_LOCS['items']:
-                if item[1] == loc_dict['urlname']:  # match by urlname - TODO better use uuid?													
+                if item[0] == loc_dict['uuid']:  												
                     there = True
         if there is True:
             update_location(self.api, loc_dict, loc_uuid, item)
