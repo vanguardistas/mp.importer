@@ -87,7 +87,7 @@ def get_coords(address_key, GOOGLE_API_KEY, urlname):
         request = request.replace('\n','')
     response = urllib.request.urlopen(request)
     str_response = response.readall().decode('utf-8')
-    data = json.loads(str_response)['results']					
+    data = json.loads(str_response)['results']
     try:
         lat = data[0]['geometry']['location']['lat']
     except:
@@ -157,12 +157,12 @@ class LocationUpdater:
                 if item[0] == loc_dict['uuid']:  												
                     there = True
         if there is True:
-            update_location(self.api, loc_dict, loc_uuid, item)
+            self.update_location(self.api, loc_dict, loc_uuid, item)
         else:    
-            insert_location(self.api, loc_dict, loc_uuid)
+            self.insert_location(self.api, loc_dict, loc_uuid)
 
 
-    def insert_location(self, loc_dict, loc_uuid):
+    def insert_location(self, api, loc_dict, loc_uuid):
         """put item into database       
         """
         status = 0
@@ -173,12 +173,12 @@ class LocationUpdater:
         return status
 
 
-    def update_location(self, loc_dict, loc_uuid):
+    def update_location(self, api, loc_dict, loc_uuid, item):
         """update item in database
            the script must pass the correct fields (only those that need updating, or all admitted fields?)  
            https://api.metropublisher.com/resources/location.html#resource-patch-location-patch
         """
-        # TODO I can PATCH only fields that have changed, or PUT all fields - if PATCH, modify loc_dict
+        # TODO I can PATCH only fields that have changed, or PUT all fields - if PATCH, modify loc_dict, use "item" to see what's there
         # maybe for big imports is better to save that time?
         status = 0
         result = self.api.PUT('/%s/locations/%s' % (self.instance_id, loc_uuid), loc_dict)
@@ -187,6 +187,8 @@ class LocationUpdater:
         if check is not None: # TODO check a field to make sure has been updated, ex. modification date!
             status = 1
         return status
+
+
 
 
 
