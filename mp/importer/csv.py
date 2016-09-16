@@ -8,6 +8,8 @@ import json
 import urllib.request
 import logging
 import van_api
+from uuid import uuid5, NAMESPACE_URL
+import datetime
 
 ########## encode/decode
 
@@ -161,7 +163,6 @@ class LocationUpdater:
             status = self.update_location(self.api, loc_dict, loc_uuid, item)
         else:    
             status = self.insert_location(self.api, loc_dict, loc_uuid)
-        print ("result of upsert", status)
         return status
 
 
@@ -206,42 +207,44 @@ class TagUpdater:
         self.api = api
         self.instance_id = instance_id
 
-    def upsert_tags(self, tagcat_dictionary, loc_uuid):   
+    def upsert_tag(self, tag, tagcat_dictionary, loc_uuid):   
         """ Creates categories if not there
             input is a dictionary of type {tag1:cat1,tag2:None,tag3:cat1,cat2} # tag can be in multiple categories, or can have no category
             Adds tag to category, then tags the location
         """
-        for tag in tagcat_dictionary:
-            category = tagcat_dictionary.get(tag)
-            if category is not None:
-               cat_uuid = uuid.uuid3(namespace, category)
-               create_cat(self.api, cat, cat_uuid, self.instance_id)
-            else:
-               cat_uuid = None
-            tag_uuid = uuid.uuid3(namespace, tag) 
-            created, tag_uuid = create_tag(self.api, tag, tag_uuid, cat_uuid, self.instance_id) 		
-            if created == 1:
-                tag = put_tag(self.api, tag_uuid, loc_uuid, self.instance_id)			
+        status = 0
+        category = tagcat_dictionary.get(tag)
+        if category is not None:
+            cat_uuid = str(uuid5(NAMESPACE_URL, str(category)))  # TODO uniq, pass it from script?
+            self.create_cat(self.api, self.instance_id, category, cat_uuid)
+        else:
+            cat_uuid = None
+        tag_uuid = str(uuid5(NAMESPACE_URL, str(tag))) 
+        created, tag_uuid = self.create_tag(self.api, self.instance_id, tag, tag_uuid, cat_uuid) 		
+        if created == 1:
+            createdtag = self.put_tag(self.api, self.instance_id, tag_uuid, loc_uuid)	
+            if createdtag == 1:
+                status = 1
+        return status		
 
 
-    def create_cat(self, cat, cat_uuid):
+    def create_cat(self, api, instance_id, cat, cat_uuid):
         EXISTING_CATS = self.api.GET('/%s/tags/categories?fields=uuid-title&rpp=100' %self.instance_id)				
         there = 0
         status = 0
         if not 'next' in EXISTING_CATS:
             for item in EXISTING_CATS['items']:
-                if item[1] == suggest_urlname(cat):  												
+                if item[1] == cat.replace(' ','-').lower(): # suggest_urlname(cat) + we should check with uuid!!!???? TODO  												
                     there = 1
                     cat_uuid = item[0]	
                 else:
                     status = 0
-                    there = 0				    											
-															
+                    there = 0			    																			
         else:
             while 'next' in EXISTING_CATS:																
                 EXISTING_CATS = self.api.GET('/%s/tags/categories?%s' %(INSTANCE_ID, EXISTING_CATS['next']))		
                 for item in EXISTING_CATS['items']:
-                    if item[1] == suggest_urlname(cat):  												
+                    if item[1] == cat.replace(' ','-').lower(): 												
                         there = 1
                         cat_uuid = item[0]																
                     else:
@@ -263,7 +266,7 @@ class TagUpdater:
         return status, cat_uuid
 
 
-    def create_tag(self, tag, tag_uuid, cat_uuid=None):
+    def create_tag(self, api, instance_id, tag, tag_uuid, cat_uuid=None):
         """ create the tag if not in the destination db
         """
         EXISTING_TAGS = self.api.GET('/%s/tags?fields=uuid-urlname&rpp=100' %self.instance_id)				
@@ -271,7 +274,7 @@ class TagUpdater:
         status = 0
         if not 'next' in EXISTING_TAGS:
             for item in EXISTING_TAGS['items']:
-                if item[1] == suggest_urlname(tag):  												
+                if item[1] == tag.replace(' ','-').lower():   												
                     there = 1
                     tag_uuid = item[0]    
                     status = 1
@@ -282,7 +285,7 @@ class TagUpdater:
             while 'next' in EXISTING_TAGS:																
                 EXISTING_TAGS = self.api.GET('/%s/tags?%s' %(self.instance_id, EXISTING_TAGS['next']))
                 for item in EXISTING_TAGS['items']:
-                    if item[1] == suggest_urlname(tag):  												
+                    if item[1] == tag.replace(' ','-').lower():   												
                         there = 1
                         status = 1
                     else:
@@ -295,7 +298,7 @@ class TagUpdater:
         # elif ***** 		TODO  what if we want to update tag?
         elif there == 0:	
             tag_creation_dict = {}
-            tag_creation_dict['urlname'] = suggest_urlname(tag)
+            tag_creation_dict['urlname'] = tag.replace(' ','-').lower() 
             tag_creation_dict['title'] = str(tag)
             tag_creation_dict['category'] = "Subject"
             tag_creation_dict['created'] = str(datetime.datetime.now())	
@@ -312,7 +315,7 @@ class TagUpdater:
         return status, tag_uuid
 
 
-    def put_tag(self, tag_uuid, loc_uuid):   														
+    def put_tag(self, api, instance_id, tag_uuid, loc_uuid):   														
         """ Tag the location
         """
         tag_dict = {}
