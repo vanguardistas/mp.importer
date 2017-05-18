@@ -222,6 +222,7 @@ def clean_content(
         content,
         cleaners=CLEANERS_CORRECT,
         fallback_cleaners=(),
+        from_type_passed=None,
         import_as='xml'):
     """Clean the content for import to metropublisher.
 
@@ -257,7 +258,7 @@ def clean_content(
         # we thow away the old context and fallback to the
         # fallback_cleaners and put the result into an
         # embed media
-        context.prob('error', 'Invalid content pushed to media embed', u'Page had invalid XML after cleaning:{error_log}\ncontent:\n{content}'.format(content=content, error_log=schema.error_log))
+        context.prob('error', 'Invalid content pushed to media embed', u'Page had invalid XML after cleaning:{error_log}\ncontent:\n{content}'.format(content=content, error_log=schema.error_log), from_type_passed)
         context = context._replace(slots=[])
         doc = _to_etree(context, content, import_as)
         for cleaner in fallback_cleaners:
