@@ -112,14 +112,14 @@ def remove_useless_br(context, content):
             context.prob('fuzzy_fix', 'remove <br/> before after element')
             continue
         if node is parent[0] and not remove_all_whitespace(parent.text):
-            if parent.tag in BLOCK_ELEMENTS:
+            grandparent = parent.getparent()
+            if parent.tag in BLOCK_ELEMENTS or grandparent is None:
                 parent.text = parent.text or ''
                 parent.text += node.tail or ''
                 parent.remove(node)
                 context.prob('fuzzy_fix', 'remove leading <br/> in block element')
                 continue
             else:
-                grandparent = parent.getparent()
                 if not remove_all_whitespace(grandparent.text) and parent is grandparent[0]\
                         and grandparent.tag in BLOCK_ELEMENTS:
                     parent.text = parent.text or ''
@@ -129,12 +129,12 @@ def remove_useless_br(context, content):
                     continue
         if node is parent[-1] and not remove_all_whitespace(node.tail):
             # if the br is the last node in the parent
-            if parent.tag not in BLOCK_ELEMENTS:
+            grandparent = parent.getparent()
+            if parent.tag not in BLOCK_ELEMENTS and grandparent is not None:
                 # let's look at our parent's parent, maybe that's a block tag
                 # we can still remove the br if we are something like <a>text<br/></a></p>
                 if remove_all_whitespace(parent.tail):
                     continue
-                grandparent = parent.getparent()
                 if parent is not grandparent[-1]:
                     continue
                 if grandparent.tag not in BLOCK_ELEMENTS:
@@ -222,6 +222,7 @@ def clean_content(
         content,
         cleaners=CLEANERS_CORRECT,
         fallback_cleaners=(),
+        from_type_passed=None,
         import_as='xml'):
     """Clean the content for import to metropublisher.
 
@@ -257,7 +258,8 @@ def clean_content(
         # we thow away the old context and fallback to the
         # fallback_cleaners and put the result into an
         # embed media
-        context.prob('error', 'Invalid content pushed to media embed', u'Page had invalid XML after cleaning:{error_log}\ncontent:\n{content}'.format(content=content, error_log=schema.error_log))
+        context.prob('error', 'Invalid content pushed to media embed - {}'.format(from_type_passed), u'Page had invalid XML after cleaning:{error_log}\ncontent:\n{content}\ncontent_type_passed:\n{from_type_passed}'.format(content=content, error_log=schema.error_log, from_type_passed))
+        #context.prob('error', 'Invalid content pushed to media embed', u'Page had invalid XML after cleaning:{error_log}\ncontent:\n{content}'.format(content=content, error_log=schema.error_log))
         context = context._replace(slots=[])
         doc = _to_etree(context, content, import_as)
         for cleaner in fallback_cleaners:
